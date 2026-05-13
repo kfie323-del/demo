@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RS PRAMOON - ระบบประมูลครบวงจร</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; background-color: #f3f4f6; }
+        .gradient-text { background: linear-gradient(90deg, #dc2626, #ea580c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .loader { border-top-color: #dc2626; -webkit-animation: spinner 1.5s linear infinite; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="text-gray-800 h-screen flex flex-col">
+
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center cursor-pointer" onclick="navigate('home')">
+                    <span class="text-2xl font-black gradient-text">RS PRAMOON</span>
+                </div>
+                <div class="hidden md:flex space-x-6 items-center" id="nav-links">
+                    </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow overflow-y-auto p-4 md:p-8" id="app-container">
+        <div id="loading-view" class="h-full flex items-center justify-center">
+            <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24"></div>
+        </div>
+
+        <div id="home-view" class="hidden max-w-7xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold border-l-4 border-red-600 pl-3">การประมูลที่กำลังดำเนินอยู่</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="auction-grid">
+                </div>
+        </div>
+
+        <div id="create-view" class="hidden max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-md">
+            <h2 class="text-2xl font-bold mb-6 text-center text-red-600">ลงสินค้าประมูลใหม่</h2>
+            <form id="createForm" onsubmit="handleCreateAuction(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">ชื่อสินค้า/ไอดีเกม</label>
+                    <input type="text" id="auc-title" class="w-full border rounded p-2 focus:ring-2 focus:ring-red-500" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">หมวดหมู่</label>
+                        <select id="auc-category" class="w-full border rounded p-2">
+                            <option value="game">เกม</option>
+                            <option value="card">การ์ด</option>
+                            <option value="other">อื่นๆ</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">ลิงก์โพสต์ Facebook (อ้างอิง)</label>
+                        <input type="url" id="auc-fb" class="w-full border rounded p-2" required>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">ราคาเริ่มต้น (บาท)</label>
+                        <input type="number" id="auc-start" class="w-full border rounded p-2" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">บิดขั้นต่ำ (บาท)</label>
+                        <input type="number" id="auc-step" class="w-full border rounded p-2" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">ราคา Auto Win (บาท)</label>
+                    <input type="number" id="auc-auto" class="w-full border rounded p-2" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">รายละเอียด/วิธีการประมูล</label>
+                    <textarea id="auc-desc" class="w-full border rounded p-2 h-24" required></textarea>
+                </div>
+                <button type="submit" class="w-full bg-red-600 text-white font-bold py-3 rounded-lg hover:bg-red-700">ส่งข้อมูลให้แอดมินอนุมัติ</button>
+            </form>
+        </div>
+
+        <div id="admin-view" class="hidden max-w-7xl mx-auto">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">แผงควบคุมแอดมิน (Admin Dashboard)</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow">
+                    <h3 class="text-xl font-bold mb-4 text-orange-600">รออนุมัติการประมูล</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 text-sm">
+                                    <th class="p-2 border">สินค้า</th>
+                                    <th class="p-2 border">ผู้ลง</th>
+                                    <th class="p-2 border">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-pending-list" class="text-sm">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow">
+                    <h3 class="text-xl font-bold mb-4 text-blue-600">จัดการลูกค้า & ระบบเงิน</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 text-sm">
+                                    <th class="p-2 border">Email / FB</th>
+                                    <th class="p-2 border">ยอดเงิน (฿)</th>
+                                    <th class="p-2 border">ประวัติ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-user-list" class="text-sm">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="auth-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full relative">
+            <button onclick="toggleModal('auth-modal', false)" class="absolute top-4 right-4 text-gray-500 hover:text-black font-bold text-2xl">&times;</button>
+            <h2 class="text-2xl font-bold mb-6 text-center" id="auth-title">เข้าสู่ระบบ / สมัครสมาชิก</h2>
+            <form id="authForm" onsubmit="handleAuth(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">อีเมล</label>
+                    <input type="email" id="auth-email" class="w-full border rounded p-2" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">รหัสผ่าน</label>
+                    <input type="password" id="auth-password" class="w-full border rounded p-2" required>
+                </div>
+                <div id="register-fields">
+                    <label class="block text-sm font-medium mb-1">ลิงก์ Facebook ส่วนตัว <span class="text-red-500">*จำเป็น</span></label>
+                    <input type="url" id="auth-fb" class="w-full border rounded p-2">
+                </div>
+                <button type="submit" class="w-full bg-gray-900 text-white font-bold py-2 rounded hover:bg-black">ดำเนินการ</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        // 1. Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDc50wlOejDQi3PTySiQss3bLuVz_-tvB4",
+            authDomain: "walletrs-d6104.firebaseapp.com",
+            databaseURL: "https://walletrs-d6104-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "walletrs-d6104",
+            storageBucket: "walletrs-d6104.firebasestorage.app",
+            messagingSenderId: "496661515180",
+            appId: "1:496661515180:web:42c3a21541cdfc68cf8809"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // 2. Global State
+        let currentUser = null;
+        let userData = null;
+
+        // 3. Auth State Listener
+        auth.onAuthStateChanged((user) => {
+            currentUser = user;
+            if (user) {
+                db.ref('users/' + user.uid).on('value', (snapshot) => {
+                    userData = snapshot.val();
+                    updateNavbar();
+                    if(userData.role === 'admin') loadAdminData();
+                });
+            } else {
+                userData = null;
+                updateNavbar();
+            }
+            navigate('home');
+            loadAuctions();
+        });
+
+        // 4. UI Navigation & Rendering
+        function navigate(view) {
+            document.getElementById('loading-view').classList.add('hidden');
+            document.getElementById('home-view').classList.add('hidden');
+            document.getElementById('create-view').classList.add('hidden');
+            document.getElementById('admin-view').classList.add('hidden');
+
+            if(view === 'home') document.getElementById('home-view').classList.remove('hidden');
+            else if(view === 'create') {
+                if(!currentUser) return Swal.fire('แจ้งเตือน', 'กรุณาเข้าสู่ระบบก่อน', 'warning');
+                document.getElementById('create-view').classList.remove('hidden');
+            }
+            else if(view === 'admin') {
+                if(!userData || userData.role !== 'admin') return Swal.fire('ผิดพลาด', 'เฉพาะแอดมินเท่านั้น', 'error');
+                document.getElementById('admin-view').classList.remove('hidden');
+            }
+        }
+
+        function updateNavbar() {
+            const nav = document.getElementById('nav-links');
+            if(!currentUser) {
+                nav.innerHTML = `<button onclick="toggleModal('auth-modal', true)" class="bg-red-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-red-700">เข้าสู่ระบบ</button>`;
+            } else {
+                let adminBtn = userData?.role === 'admin' ? `<button onclick="navigate('admin')" class="text-orange-600 font-bold hover:underline">จัดการหลังบ้าน</button>` : '';
+                nav.innerHTML = `
+                    <button onclick="navigate('home')" class="text-gray-600 hover:text-red-600 font-medium">หน้าหลัก</button>
+                    <button onclick="navigate('create')" class="text-gray-600 hover:text-red-600 font-medium">ลงประมูล</button>
+                    <button class="text-gray-600 hover:text-red-600 font-medium">ยอดเงิน: ${userData?.balance || 0} ฿</button>
+                    ${adminBtn}
+                    <button onclick="auth.signOut()" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 font-medium">ออกระบบ</button>
+                `;
+            }
+        }
+
+        function toggleModal(id, show) {
+            const modal = document.getElementById(id);
+            show ? modal.classList.remove('hidden') : modal.classList.add('hidden');
+        }
+
+        // 5. Authentication (Login / Register combined)
+        function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-password').value;
+            const fb = document.getElementById('auth-fb').value;
+
+            // Attempt Login first, if fail due to no user, Register
+            auth.signInWithEmailAndPassword(email, pass)
+                .then(() => {
+                    toggleModal('auth-modal', false);
+                    Swal.fire('สำเร็จ', 'เข้าสู่ระบบเรียบร้อย', 'success');
+                })
+                .catch((error) => {
+                    if(error.code === 'auth/user-not-found') {
+                        if(!fb) return Swal.fire('ผิดพลาด', 'การสมัครใหม่ต้องกรอกลิงก์ Facebook', 'error');
+                        auth.createUserWithEmailAndPassword(email, pass).then((cred) => {
+                            db.ref('users/' + cred.user.uid).set({
+                                email: email, facebook: fb, role: 'user', balance: 0, createdAt: Date.now()
+                            });
+                            toggleModal('auth-modal', false);
+                            Swal.fire('สำเร็จ', 'สมัครสมาชิกเรียบร้อย', 'success');
+                        });
+                    } else {
+                        Swal.fire('ผิดพลาด', error.message, 'error');
+                    }
+                });
+        }
+
+        // 6. Database Operations: Auctions
+        function handleCreateAuction(e) {
+            e.preventDefault();
+            const payload = {
+                title: document.getElementById('auc-title').value,
+                category: document.getElementById('auc-category').value,
+                fbLink: document.getElementById('auc-fb').value,
+                startPrice: Number(document.getElementById('auc-start').value),
+                step: Number(document.getElementById('auc-step').value),
+                autoWin: Number(document.getElementById('auc-auto').value),
+                desc: document.getElementById('auc-desc').value,
+                ownerId: currentUser.uid,
+                ownerEmail: currentUser.email,
+                currentBid: Number(document.getElementById('auc-start').value),
+                status: 'pending',
+                createdAt: Date.now()
+            };
+
+            db.ref('auctions').push(payload).then(() => {
+                e.target.reset();
+                Swal.fire('สำเร็จ', 'ส่งข้อมูลเรียบร้อย รอแอดมินอนุมัติ', 'success');
+                navigate('home');
+            });
+        }
+
+        function loadAuctions() {
+            db.ref('auctions').on('value', (snapshot) => {
+                const grid = document.getElementById('auction-grid');
+                grid.innerHTML = '';
+                snapshot.forEach((child) => {
+                    const data = child.val();
+                    if(data.status === 'approved') {
+                        grid.innerHTML += `
+                            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition">
+                                <div class="p-5">
+                                    <span class="text-xs font-bold bg-gray-800 text-white px-2 py-1 rounded uppercase">${data.category}</span>
+                                    <h3 class="text-xl font-bold mt-2 mb-1 truncate">${data.title}</h3>
+                                    <p class="text-sm text-gray-500 mb-4 h-10 overflow-hidden">${data.desc}</p>
+                                    <div class="bg-gray-50 p-3 rounded mb-4">
+                                        <div class="flex justify-between mb-1"><span class="text-sm">ราคาปัจจุบัน:</span> <span class="font-bold text-red-600">${data.currentBid} ฿</span></div>
+                                        <div class="flex justify-between mb-1"><span class="text-sm">บิดขั้นต่ำ:</span> <span class="font-bold">+${data.step} ฿</span></div>
+                                        <div class="flex justify-between"><span class="text-sm text-red-500">Auto Win:</span> <span class="font-bold text-red-500">${data.autoWin} ฿</span></div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button onclick="placeBid('${child.key}')" class="flex-1 bg-red-500 text-white py-2 rounded font-bold hover:bg-red-600">ประมูล</button>
+                                        <a href="${data.fbLink}" target="_blank" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 text-center flex items-center justify-center">FB</a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+            });
+        }
+
+        function placeBid(id) {
+            if(!currentUser) return Swal.fire('เตือน', 'กรุณาเข้าระบบ', 'warning');
+            Swal.fire({
+                title: 'ยืนยันการบิด',
+                text: "หากยอดเงินไม่พอ ระบบจะไม่บันทึกการบิด",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยัน',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('กำลังพัฒนา', 'การคำนวณหักเงินแบบเรียลไทม์จำเป็นต้องใช้ Cloud Functions ฝั่ง Backend เพื่อความปลอดภัย', 'info');
+                }
+            })
+        }
+
+        // 7. Admin Functions
+        function loadAdminData() {
+            // Load Pending Auctions
+            db.ref('auctions').orderByChild('status').equalTo('pending').on('value', (snap) => {
+                const list = document.getElementById('admin-pending-list');
+                list.innerHTML = '';
+                snap.forEach((child) => {
+                    const data = child.val();
+                    list.innerHTML += `
+                        <tr class="border-b">
+                            <td class="p-2 truncate max-w-[150px]">${data.title}</td>
+                            <td class="p-2">${data.ownerEmail}</td>
+                            <td class="p-2 flex gap-2">
+                                <button onclick="updateAuctionStatus('${child.key}', 'approved')" class="bg-green-500 text-white px-3 py-1 rounded text-xs">อนุมัติ</button>
+                                <button onclick="updateAuctionStatus('${child.key}', 'rejected')" class="bg-red-500 text-white px-3 py-1 rounded text-xs">ปฏิเสธ</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+
+            // Load Users
+            db.ref('users').on('value', (snap) => {
+                const list = document.getElementById('admin-user-list');
+                list.innerHTML = '';
+                snap.forEach((child) => {
+                    const user = child.val();
+                    list.innerHTML += `
+                        <tr class="border-b">
+                            <td class="p-2"><div class="font-bold">${user.email}</div><a href="${user.facebook}" class="text-blue-500 text-xs" target="_blank">ดู Facebook</a></td>
+                            <td class="p-2 font-bold">${user.balance} ฿</td>
+                            <td class="p-2"><button onclick="alert('ดูประวัติ ${user.email}')" class="bg-gray-800 text-white px-3 py-1 rounded text-xs">เช็ค</button></td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        function updateAuctionStatus(id, status) {
+            db.ref('auctions/' + id).update({ status: status });
+            Swal.fire('สำเร็จ', `เปลี่ยนสถานะเป็น ${status} แล้ว`, 'success');
+        }
+    </script>
+</body>
+</html>
