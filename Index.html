@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RS RUPDAN V6 - Ultimate Dashboard</title>
+    <title>RS RUPDAN V7 - Official System</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -13,275 +13,230 @@
 
     <style>
         :root {
-            --primary: #3b82f6;
-            --secondary: #6366f1;
+            --primary: #2563eb;
+            --dark: #0f172a;
+            --glass: rgba(255, 255, 255, 0.9);
             --success: #10b981;
-            --bg-light: #f8fafc;
-            --accent: #f59e0b;
         }
 
-        * { font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-light); color: #1e293b; transition: all 0.3s ease; }
-        
-        /* สไตล์หน้า Admin Sidebar */
-        .admin-sidebar {
-            width: 280px; height: 100vh; background: #0f172a; color: white;
-            position: fixed; left: 0; top: 0; z-index: 1000; overflow-y: auto;
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        * { font-family: 'Kanit', sans-serif; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: #f1f5f9; color: #1e293b; margin: 0; overflow-x: hidden; }
+
+        /* Admin Sidebar Responsive */
+        #admin-sidebar {
+            width: 280px; height: 100vh; background: var(--dark); color: white;
+            position: fixed; left: -280px; top: 0; z-index: 2000;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+        #admin-sidebar.open { left: 0; }
+        .admin-main { transition: all 0.4s; margin-left: 0; }
+        .admin-active .admin-main { margin-left: 280px; }
+
         @media (max-width: 1024px) {
-            .admin-sidebar { left: -280px; }
-            .admin-sidebar.open { left: 0; }
-            .main-content.admin { margin-left: 0 !important; }
+            .admin-active .admin-main { margin-left: 0; }
         }
 
-        /* ปุ่มและ UI สวยงาม */
-        .btn-grad {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            transition: 0.3s; color: white; border-radius: 14px;
+        /* UI Enhancements */
+        .card-custom { background: var(--glass); backdrop-filter: blur(10px); border-radius: 24px; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+        .btn-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border-radius: 16px; transition: 0.3s; font-weight: 600; }
+        .btn-blue:active { transform: scale(0.95); }
+
+        /* Status Stepper (Food Delivery Style) */
+        .stepper { display: flex; justify-content: space-between; position: relative; padding: 20px 0; }
+        .stepper::before { content: ''; position: absolute; top: 38px; left: 0; right: 0; height: 2px; background: #e2e8f0; z-index: 1; }
+        .progress-line { position: absolute; top: 38px; left: 0; height: 2px; background: var(--success); z-index: 2; transition: 0.5s; }
+        .step-item { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; width: 60px; }
+        .step-icon { width: 36px; height: 36px; border-radius: 50%; background: #fff; border: 3px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: 0.4s; }
+        .step-item.active .step-icon { border-color: var(--success); background: var(--success); color: white; transform: scale(1.1); box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+        .step-text { font-size: 9px; font-weight: bold; margin-top: 8px; color: #94a3b8; text-align: center; }
+        .step-item.active .step-text { color: var(--success); }
+
+        /* Inputs */
+        input, select, textarea { 
+            width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 14px; 
+            outline: none; transition: 0.3s; background: white;
         }
-        .btn-grad:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4); }
-        .btn-grad:active { transform: scale(0.95); }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37,99,235,0.1); }
 
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
-        
-        /* Stepper (Food Delivery Style) */
-        .stepper-container { display: flex; justify-content: space-between; position: relative; margin-bottom: 20px; }
-        .stepper-line { position: absolute; top: 15px; left: 0; right: 0; height: 3px; background: #e2e8f0; z-index: 0; }
-        .stepper-line-active { position: absolute; top: 15px; left: 0; height: 3px; background: var(--success); z-index: 1; transition: 0.5s; }
-        .step-node { width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: 0.3s; border: 4px solid var(--bg-light); }
-        .step-node.active { background: var(--success); color: white; transform: scale(1.2); }
-        .step-label { font-size: 10px; margin-top: 8px; font-weight: bold; color: #94a3b8; }
-        .step-node.active + .step-label { color: var(--success); }
-
-        /* Floating Contact Menu */
-        #contact-dropdown {
-            position: absolute; top: 70px; right: 16px; width: 180px; 
-            border-radius: 20px; display: none; z-index: 1100;
-        }
-        #contact-dropdown.open { display: block; animation: fadeInDown 0.3s; }
-
-        input, select { 
-            border: 2px solid #f1f5f9 !important; border-radius: 12px !important; 
-            padding: 12px 16px !important; outline: none !important; transition: 0.3s;
-        }
-        input:focus { border-color: var(--primary) !important; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
-
-        /* Hide Scrollbar */
-        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        .hidden-view { display: none !important; }
+        .nav-active { color: var(--primary) !important; }
     </style>
 </head>
 <body class="pb-24">
 
-    <header id="customer-header" class="glass sticky top-0 z-[1000] px-4 py-3 flex justify-between items-center border-b">
+    <header id="customer-header" class="sticky top-0 bg-white/80 backdrop-blur-md z-[1000] px-5 py-4 border-b flex justify-between items-center">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 btn-grad flex items-center justify-center font-bold text-xl shadow-lg">R</div>
-            <h1 class="font-bold text-lg tracking-tight">RS RUPDAN</h1>
+            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">R</div>
+            <span class="font-bold text-lg tracking-tight">RS RUPDAN V7</span>
         </div>
-
-        <div class="flex items-center gap-2">
-            <button onclick="toggleContactMenu()" class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center transition hover:bg-blue-200">
-                <i class="fas fa-headset"></i>
-            </button>
-            
-            <div id="header-user-info" class="hidden flex items-center gap-2 bg-slate-100 p-1 pr-4 rounded-full border cursor-pointer" onclick="navigate('profile')">
-                <div id="user-avatar" class="w-8 h-8 btn-grad rounded-full flex items-center justify-center text-xs font-bold uppercase">U</div>
-                <div>
-                    <p id="header-balance" class="text-sm font-bold text-blue-600 leading-none">0.00 ฿</p>
-                </div>
+        <div id="user-nav-area" class="flex items-center gap-3">
+            <button onclick="toggleContact()" class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-600"><i class="fas fa-headset"></i></button>
+            <div id="user-info-box" class="hidden flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 cursor-pointer" onclick="navigate('profile')">
+                <span id="header-balance" class="font-bold text-blue-600 text-sm">0.00 ฿</span>
+                <div class="w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center text-white text-[10px] font-bold" id="header-initial">U</div>
             </div>
-            <button id="login-btn" onclick="navigate('login')" class="bg-blue-600 text-white px-5 py-2 rounded-full text-xs font-bold">เข้าสู่ระบบ</button>
+            <button id="login-nav-btn" onclick="navigate('login')" class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-md shadow-blue-200">เข้าสู่ระบบ</button>
         </div>
-
-        <div id="contact-dropdown" class="glass shadow-2xl p-3 space-y-2">
-            <p class="text-[10px] font-bold text-gray-400 uppercase px-2 mb-1">ช่องทางติดต่อ</p>
-            <div id="contact-links-container" class="space-y-2">
-                </div>
+        
+        <div id="contact-panel" class="hidden absolute top-20 right-5 w-48 bg-white shadow-2xl rounded-2xl p-3 border animate__animated animate__fadeInDown">
+            <p class="text-[10px] font-bold text-slate-400 mb-2 px-2">ติดต่อแอดมิน</p>
+            <div id="admin-links-list" class="space-y-1"></div>
         </div>
     </header>
 
-    <aside id="admin-sidebar" class="admin-sidebar p-6">
-        <div class="flex items-center gap-3 mb-10 pb-4 border-b border-slate-700">
-            <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold">A</div>
-            <h2 class="text-lg font-bold tracking-widest text-blue-400">ADMIN CONTROL</h2>
+    <aside id="admin-sidebar" class="p-6">
+        <div class="flex items-center gap-3 mb-10 pb-4 border-b border-slate-800">
+            <div class="w-8 h-8 bg-blue-500 rounded flex items-center justify-center text-white font-bold">A</div>
+            <h2 class="text-lg font-bold">ADMIN PANEL</h2>
+            <button onclick="toggleAdminMenu()" class="lg:hidden ml-auto"><i class="fas fa-times"></i></button>
         </div>
-
-        <nav class="space-y-1">
-            <div class="admin-link active" onclick="adminTab('dash')"><i class="fas fa-chart-pie w-8"></i> แดชบอร์ด</div>
-            <div class="admin-link" onclick="adminTab('orders')"><i class="fas fa-tasks w-8"></i> จัดการออเดอร์</div>
-            <div class="admin-link" onclick="adminTab('history')"><i class="fas fa-folder-open w-8"></i> ประวัติงานทั้งหมด</div>
-            <div class="admin-link" onclick="adminTab('topup')"><i class="fas fa-check-double w-8"></i> อนุมัติการเติมเงิน</div>
-            <div class="admin-link" onclick="adminTab('rates')"><i class="fas fa-tags w-8"></i> ตั้งค่าเรทราคา</div>
-            <div class="admin-link" onclick="adminTab('announce')"><i class="fas fa-bullhorn w-8"></i> ประกาศ & ลิงก์</div>
-            <div class="admin-link" onclick="adminTab('workflow')"><i class="fas fa-route w-8"></i> ตั้งค่าขั้นตอนงาน</div>
-            <div class="admin-link" onclick="adminTab('users')"><i class="fas fa-users w-8"></i> จัดการลูกค้า</div>
-            <div class="admin-link" onclick="adminTab('logs')"><i class="fas fa-list-ul w-8"></i> บันทึกธุรกรรม</div>
-            <div class="pt-6 border-t border-slate-700 mt-4">
-                <div id="shop-toggle-container" class="mb-4"></div>
-                <button onclick="logout()" class="w-full bg-red-500/10 text-red-500 border border-red-500/30 py-3 rounded-xl font-bold hover:bg-red-500 hover:text-white transition">ออกจากระบบ</button>
+        <nav class="space-y-2">
+            <div class="p-3 hover:bg-slate-800 rounded-xl cursor-pointer flex items-center gap-3" onclick="adminGo('dash')"><i class="fas fa-chart-line w-5"></i> แดชบอร์ด</div>
+            <div class="p-3 hover:bg-slate-800 rounded-xl cursor-pointer flex items-center gap-3" onclick="adminGo('orders')"><i class="fas fa-shopping-cart w-5"></i> จัดการออเดอร์</div>
+            <div class="p-3 hover:bg-slate-800 rounded-xl cursor-pointer flex items-center gap-3" onclick="adminGo('topup')"><i class="fas fa-wallet w-5"></i> อนุมัติเงินเข้า</div>
+            <div class="p-3 hover:bg-slate-800 rounded-xl cursor-pointer flex items-center gap-3" onclick="adminGo('users')"><i class="fas fa-users w-5"></i> ข้อมูลลูกค้า</div>
+            <div class="p-3 hover:bg-slate-800 rounded-xl cursor-pointer flex items-center gap-3" onclick="adminGo('settings')"><i class="fas fa-cog w-5"></i> ตั้งค่าระบบ</div>
+            <div class="pt-10">
+                <button onclick="logout()" class="w-full bg-red-500/10 text-red-500 py-3 rounded-xl font-bold border border-red-500/20">ออกจากระบบ</button>
             </div>
         </nav>
     </aside>
 
-    <main id="view-container" class="container mx-auto px-4 mt-6 max-w-lg">
-        
-        <section id="page-home" class="page-view active animate__animated animate__fadeIn">
-            <div class="rounded-[2rem] overflow-hidden mb-6 shadow-2xl h-44 relative bg-blue-600">
-                <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=600" class="w-full h-full object-cover opacity-50">
+    <main id="main-content" class="admin-main container mx-auto px-4 pt-6 max-w-lg">
+
+        <section id="p-home" class="view-section animate__animated animate__fadeIn">
+            <div class="relative h-44 rounded-[2.5rem] overflow-hidden mb-6 shadow-xl bg-blue-600">
+                <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover opacity-60">
                 <div class="absolute inset-0 p-8 flex flex-col justify-end text-white">
-                    <h2 class="text-2xl font-bold">บริการดันแรงค์พรีเมียม</h2>
-                    <p class="text-white/70 text-sm">รวดเร็ว ปลอดภัย ไร้การโกง 100%</p>
+                    <h2 class="text-2xl font-bold">ยินดีต้อนรับสู่ RS RUPDAN</h2>
+                    <p class="text-white/80 text-sm">บริการจ้างดันแรงค์อันดับ 1 ของไทย</p>
                 </div>
             </div>
 
-            <div id="shop-close-alert" class="hidden mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-3xl text-red-600 flex items-center gap-3 font-bold animate__animated animate__shakeX">
-                <i class="fas fa-exclamation-triangle text-xl"></i>
-                <p>ขณะนี้ปิดรับออเดอร์ชั่วคราวครับ</p>
+            <div id="shop-closed-banner" class="hidden-view p-4 bg-red-50 border-2 border-red-200 rounded-2xl mb-6 text-red-600 font-bold flex items-center gap-3">
+                <i class="fas fa-store-slash"></i> ขณะนี้ปิดรับออเดอร์ชั่วคราว
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-8">
-                <div onclick="navigate('order')" class="glass p-6 rounded-[2rem] text-center active:scale-95 transition cursor-pointer shadow-sm">
-                    <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl"><i class="fas fa-rocket"></i></div>
-                    <span class="font-bold text-sm">จ้างดันแรงค์</span>
+                <div onclick="navigate('order')" class="card-custom p-6 text-center active:scale-95 transition cursor-pointer">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl"><i class="fas fa-gamepad"></i></div>
+                    <span class="font-bold text-sm">สั่งจ้างดันแรงค์</span>
                 </div>
-                <div onclick="navigate('topup')" class="glass p-6 rounded-[2rem] text-center active:scale-95 transition cursor-pointer shadow-sm">
-                    <div class="w-14 h-14 bg-orange-100 text-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl"><i class="fas fa-wallet"></i></div>
+                <div onclick="navigate('topup')" class="card-custom p-6 text-center active:scale-95 transition cursor-pointer">
+                    <div class="w-12 h-12 bg-orange-100 text-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl"><i class="fas fa-coins"></i></div>
                     <span class="font-bold text-sm">เติมเงินวอลเล็ต</span>
                 </div>
             </div>
 
-            <div class="glass p-6 rounded-[2rem] mb-6 shadow-sm border-l-[6px] border-blue-500">
-                <h3 class="font-bold mb-2 flex items-center gap-2"><i class="fas fa-newspaper text-blue-600"></i> ประกาศล่าสุด</h3>
-                <div id="home-announce-text" class="text-sm text-gray-500 leading-relaxed">กำลังโหลดข้อมูลประกาศ...</div>
+            <div class="card-custom p-6 mb-6">
+                <h3 class="font-bold mb-3 flex items-center gap-2 text-blue-600"><i class="fas fa-bullhorn"></i> ประกาศจากร้าน</h3>
+                <div id="announcement-area" class="text-sm text-slate-500 leading-relaxed">กำลังโหลดประกาศ...</div>
             </div>
         </section>
 
-        <section id="page-order" class="page-view hidden animate__animated animate__fadeIn">
-            <h3 class="text-xl font-bold mb-6">สร้างรายการจ้างงาน</h3>
-            <div class="glass p-8 rounded-[2.5rem] space-y-6">
-                <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-2xl">
-                    <button id="mode-cs" onclick="setMode('cs')" class="py-3 rounded-xl font-bold text-sm transition">4V4 (CS)</button>
-                    <button id="mode-br" onclick="setMode('br')" class="py-3 rounded-xl font-bold text-sm transition">แรงค์ใหญ่ (BR)</button>
+        <section id="p-order" class="view-section hidden-view animate__animated animate__fadeIn">
+            <h3 class="text-xl font-bold mb-6">สร้างรายการสั่งจ้าง</h3>
+            <div class="card-custom p-8 space-y-6">
+                <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-2xl">
+                    <button id="m-cs" onclick="selectMode('cs')" class="py-2.5 rounded-xl font-bold text-xs transition">4V4 (CS)</button>
+                    <button id="m-br" onclick="selectMode('br')" class="py-2.5 rounded-xl font-bold text-xs transition">แรงค์ใหญ่ (BR)</button>
                 </div>
-
                 <div class="space-y-4">
-                    <div class="input-group">
-                        <label class="text-xs font-bold text-gray-400 mb-2 block uppercase tracking-wider">แรงค์เป้าหมาย</label>
-                        <select id="ord-target" onchange="calc()" class="w-full">
-                            <option value="low">ต่ำกว่าแรงค์แดง</option>
-                            <option value="red">แรงค์แดง (Diamond)</option>
-                            <option value="master">มาสเตอร์ (Master)</option>
-                            <option value="grand">แกรนด์มาสเตอร์</option>
-                        </select>
-                    </div>
+                    <select id="ord-rank" onchange="calcPrice()">
+                        <option value="low">ต่ำกว่าแรงค์แดง</option>
+                        <option value="red">Diamond (แรงค์แดง)</option>
+                        <option value="master">Master (มาสเตอร์)</option>
+                        <option value="grand">Grandmaster (แกรนด์)</option>
+                    </select>
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="input-group">
-                            <label class="text-xs font-bold text-gray-400 mb-2 block uppercase">ปัจจุบัน (ดาว/แต้ม)</label>
-                            <input type="number" id="ord-cur" placeholder="เช่น 10" oninput="calc()" class="w-full">
-                        </div>
-                        <div class="input-group">
-                            <label class="text-xs font-bold text-gray-400 mb-2 block uppercase">เป้าหมาย (ดาว/แต้ม)</label>
-                            <input type="number" id="ord-tar" placeholder="เช่น 51" oninput="calc()" class="w-full">
-                        </div>
+                        <input type="number" id="ord-cur" placeholder="ดาว/แต้ม ปัจจุบัน" oninput="calcPrice()">
+                        <input type="number" id="ord-tar" placeholder="เป้าหมาย" oninput="calcPrice()">
                     </div>
-                    <div class="input-group">
-                        <label class="text-xs font-bold text-gray-400 mb-2 block uppercase">UID ภายในเกม</label>
-                        <input type="text" id="ord-uid-game" placeholder="ระบุ UID ของคุณ" class="w-full">
-                    </div>
+                    <input type="text" id="ord-gameuid" placeholder="กรอก UID ภายในเกม">
                 </div>
-
-                <div class="bg-blue-900 rounded-[2rem] p-8 text-center text-white">
-                    <p class="text-[10px] text-white/50 uppercase font-bold tracking-widest mb-1">ยอดรวมที่ต้องชำระ</p>
-                    <h4 class="text-5xl font-black"><span id="ord-price">0</span> ฿</h4>
+                <div class="bg-slate-900 rounded-[2rem] p-8 text-center text-white relative overflow-hidden">
+                    <p class="text-[10px] text-slate-500 font-bold uppercase mb-1">ยอดรวมทั้งหมด</p>
+                    <h4 class="text-5xl font-black text-blue-400"><span id="ord-total">0</span> ฿</h4>
                 </div>
-
-                <button onclick="submitOrder()" class="btn-grad w-full py-5 text-lg font-bold shadow-blue-200">ยืนยันและชำระเงิน</button>
+                <button onclick="confirmOrder()" class="btn-blue w-full py-5 text-lg shadow-lg shadow-blue-100">ยืนยันการชำระเงิน</button>
             </div>
         </section>
 
-        <section id="page-tracking" class="page-view hidden animate__animated animate__fadeIn">
-            <h3 class="text-xl font-bold mb-6">ติดตามงานที่จ้าง</h3>
-            <div id="tracking-container" class="space-y-6">
+        <section id="p-tracking" class="view-section hidden-view animate__animated animate__fadeIn">
+            <h3 class="text-xl font-bold mb-6">ติดตามสถานะงาน</h3>
+            <div id="tracking-list" class="space-y-6">
                 </div>
         </section>
 
-        <section id="page-profile" class="page-view hidden animate__animated animate__fadeIn">
-            <div class="glass rounded-[2.5rem] p-8 mb-6 text-center">
-                <div id="prof-avatar" class="w-24 h-24 btn-grad rounded-full mx-auto flex items-center justify-center text-3xl font-bold shadow-xl mb-4 uppercase">U</div>
-                <h4 id="prof-name" class="text-xl font-bold">ชื่อลูกค้า</h4>
-                <p id="prof-email" class="text-sm text-gray-400 mb-6">email@example.com</p>
-                
-                <div class="grid grid-cols-2 gap-4 text-left">
-                    <div class="bg-blue-50 p-4 rounded-2xl">
-                        <p class="text-[10px] font-bold text-blue-400 uppercase">เงินในระบบ</p>
-                        <p id="prof-balance" class="text-lg font-bold text-blue-600">0.00 ฿</p>
+        <section id="p-profile" class="view-section hidden-view animate__animated animate__fadeIn">
+            <div class="card-custom p-8 text-center mb-6">
+                <div id="p-avatar" class="w-20 h-20 bg-blue-600 text-white rounded-full mx-auto flex items-center justify-center text-3xl font-bold mb-4 shadow-xl">U</div>
+                <h4 id="p-name" class="text-xl font-bold">-</h4>
+                <p id="p-email" class="text-sm text-slate-400 mb-6">-</p>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-blue-50 p-4 rounded-2xl text-left border border-blue-100">
+                        <p class="text-[10px] font-bold text-blue-400 uppercase">เงินคงเหลือ</p>
+                        <p id="p-balance" class="text-lg font-bold text-blue-600">0.00 ฿</p>
                     </div>
-                    <div class="bg-green-50 p-4 rounded-2xl text-right">
-                        <p class="text-[10px] font-bold text-green-400 uppercase">งานที่สำเร็จ</p>
-                        <p id="prof-done" class="text-lg font-bold text-green-600">0 รายการ</p>
+                    <div class="bg-slate-50 p-4 rounded-2xl text-left border border-slate-100">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">งานที่สำเร็จ</p>
+                        <p id="p-orders" class="text-lg font-bold text-slate-700">0 รายการ</p>
                     </div>
                 </div>
             </div>
-
-            <div class="space-y-4">
-                <button onclick="editProfilePopup()" class="w-full glass p-5 rounded-3xl flex justify-between items-center font-bold">
-                    <span><i class="fas fa-user-edit mr-3 text-blue-500"></i> แก้ไขข้อมูลส่วนตัว</span>
-                    <i class="fas fa-chevron-right text-gray-300"></i>
+            <div class="space-y-3">
+                <button onclick="editInfoPopup()" class="w-full card-custom p-5 flex justify-between items-center font-bold">
+                    <span><i class="fas fa-user-edit text-blue-500 mr-3"></i> แก้ไขข้อมูลส่วนตัว</span>
+                    <i class="fas fa-chevron-right text-slate-300"></i>
                 </button>
-                <button onclick="navigate('history')" class="w-full glass p-5 rounded-3xl flex justify-between items-center font-bold">
-                    <span><i class="fas fa-history mr-3 text-orange-500"></i> ประวัติการทำรายการ</span>
-                    <i class="fas fa-chevron-right text-gray-300"></i>
-                </button>
-                <button onclick="logout()" class="w-full bg-red-50 p-5 rounded-3xl flex justify-between items-center font-bold text-red-500 border border-red-100">
-                    <span><i class="fas fa-sign-out-alt mr-3"></i> ออกจากระบบ</span>
+                <button onclick="logout()" class="w-full bg-red-50 p-5 rounded-[1.5rem] flex justify-between items-center font-bold text-red-500 border border-red-100">
+                    <span><i class="fas fa-power-off mr-3"></i> ออกจากระบบ</span>
                 </button>
             </div>
         </section>
 
-        <section id="page-login" class="page-view hidden animate__animated animate__fadeIn">
-            <div class="glass p-10 rounded-[2.5rem] shadow-2xl">
-                <h2 class="text-2xl font-bold mb-8 text-center">เข้าสู่ระบบ</h2>
+        <section id="p-login" class="view-section hidden-view animate__animated animate__fadeIn">
+            <div class="card-custom p-10 shadow-2xl">
+                <h2 class="text-2xl font-bold text-center mb-8">เข้าสู่ระบบ</h2>
                 <div class="space-y-4">
-                    <input type="email" id="log-email" placeholder="อีเมลของคุณ" class="w-full">
-                    <input type="password" id="log-pass" placeholder="รหัสผ่าน" class="w-full">
-                    <button onclick="processLogin()" class="btn-grad w-full py-4 font-bold">เข้าสู่ระบบ</button>
-                    <p class="text-center text-sm text-gray-400 mt-6">ยังไม่มีบัญชี? <span onclick="navigate('register')" class="text-blue-600 font-bold cursor-pointer underline">สมัครสมาชิก</span></p>
+                    <input type="email" id="log-email" placeholder="อีเมล">
+                    <input type="password" id="log-pass" placeholder="รหัสผ่าน">
+                    <button onclick="handleLogin()" class="btn-blue w-full py-4 mt-2">เข้าสู่ระบบ</button>
+                    <p class="text-center text-sm text-slate-400 mt-6" onclick="navigate('register')">ยังไม่มีบัญชี? <span class="text-blue-600 font-bold underline cursor-pointer">สมัครสมาชิก</span></p>
                 </div>
             </div>
         </section>
 
-        <section id="page-register" class="page-view hidden animate__animated animate__fadeIn text-sm">
-            <div class="glass p-8 rounded-[2.5rem]">
-                <h2 class="text-2xl font-bold mb-6 text-center">สมัครสมาชิก</h2>
-                <div class="space-y-3">
-                    <input type="text" id="reg-name" placeholder="ชื่อ-นามสกุล" class="w-full">
-                    <input type="text" id="reg-fb" placeholder="ลิงก์ Facebook ของคุณ" class="w-full">
-                    <input type="email" id="reg-email" placeholder="อีเมล" class="w-full">
-                    <input type="password" id="reg-pass" placeholder="ตั้งรหัสผ่าน" class="w-full">
-                    <button onclick="processRegister()" class="btn-grad w-full py-4 font-bold mt-4">ยืนยันข้อมูล</button>
-                    <button onclick="navigate('login')" class="w-full py-2 text-gray-400 font-bold">กลับไปหน้าล็อกอิน</button>
+        <section id="p-register" class="view-section hidden-view animate__animated animate__fadeIn">
+            <div class="card-custom p-10">
+                <h2 class="text-2xl font-bold text-center mb-8">สมัครสมาชิก</h2>
+                <div class="space-y-4">
+                    <input type="text" id="reg-name" placeholder="ชื่อ-นามสกุล">
+                    <input type="text" id="reg-fb" placeholder="ลิงก์เฟซบุ๊กของคุณ">
+                    <input type="email" id="reg-email" placeholder="อีเมลสำหรับเข้าใช้งาน">
+                    <input type="password" id="reg-pass" placeholder="ตั้งรหัสผ่าน">
+                    <button onclick="handleRegister()" class="btn-blue w-full py-4 mt-2">ยืนยันการสมัคร</button>
+                    <button onclick="navigate('login')" class="w-full text-sm text-slate-400 py-2">มีบัญชีแล้ว? กลับไปล็อกอิน</button>
                 </div>
             </div>
         </section>
 
-        <div id="admin-view-root" class="hidden">
-            </div>
+        <div id="admin-view-root" class="hidden-view"></div>
 
     </main>
 
-    <nav id="customer-nav" class="fixed bottom-0 left-0 right-0 glass h-20 flex justify-around items-center px-6 border-t rounded-t-[2.5rem] z-[1000]">
-        <div onclick="navigate('home')" id="nav-home" class="nav-btn active flex flex-col items-center gap-1 text-gray-400 transition">
-            <i class="fas fa-home text-xl"></i><span class="text-[10px] font-bold uppercase">หน้าแรก</span>
+    <nav id="customer-nav" class="fixed bottom-0 left-0 right-0 h-20 bg-white/90 backdrop-blur-lg border-t border-slate-100 flex justify-around items-center px-6 z-[1000] rounded-t-[2.5rem] shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
+        <div onclick="navigate('home')" id="n-home" class="flex flex-col items-center gap-1 text-slate-300 nav-active transition cursor-pointer">
+            <i class="fas fa-house-chimney text-xl"></i><span class="text-[10px] font-bold uppercase">Home</span>
         </div>
-        <div onclick="navigate('order')" id="nav-order" class="nav-btn flex flex-col items-center gap-1 text-gray-400 transition">
-            <i class="fas fa-plus-circle text-xl"></i><span class="text-[10px] font-bold uppercase">สั่งงาน</span>
+        <div onclick="navigate('order')" id="n-order" class="flex flex-col items-center gap-1 text-slate-300 transition cursor-pointer">
+            <i class="fas fa-plus-circle text-xl"></i><span class="text-[10px] font-bold uppercase">Order</span>
         </div>
-        <div onclick="navigate('tracking')" id="nav-tracking" class="nav-btn flex flex-col items-center gap-1 text-gray-400 transition">
-            <i class="fas fa-clock-rotate-left text-xl"></i><span class="text-[10px] font-bold uppercase">ติดตาม</span>
+        <div onclick="navigate('tracking')" id="n-tracking" class="flex flex-col items-center gap-1 text-slate-300 transition cursor-pointer">
+            <i class="fas fa-layer-group text-xl"></i><span class="text-[10px] font-bold uppercase">Status</span>
         </div>
-        <div onclick="navigate('profile')" id="nav-profile" class="nav-btn flex flex-col items-center gap-1 text-gray-400 transition">
-            <i class="fas fa-user-circle text-xl"></i><span class="text-[10px] font-bold uppercase">โปรไฟล์</span>
+        <div onclick="navigate('profile')" id="n-profile" class="flex flex-col items-center gap-1 text-slate-300 transition cursor-pointer">
+            <i class="fas fa-user-circle text-xl"></i><span class="text-[10px] font-bold uppercase">Profile</span>
         </div>
     </nav>
 
@@ -291,235 +246,178 @@
 
     <script>
         // =========================================
-        // FIREBASE CONFIG & INIT
+        // INITIALIZATION
         // =========================================
-        const firebaseConfig = {
+        const config = {
             apiKey: "AIzaSyDc50wlOejDQi3PTySiQss3bLuVz_-tvB4",
             authDomain: "walletrs-d6104.firebaseapp.com",
             databaseURL: "https://walletrs-d6104-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "walletrs-d6104",
-            storageBucket: "walletrs-d6104.firebasestorage.app",
-            messagingSenderId: "496661515180",
-            appId: "1:496661515180:web:42c3a21541cdfc68cf8809",
-            measurementId: "G-2P8SGLR602"
+            projectId: "walletrs-d6104"
         };
-        firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(config);
         const auth = firebase.auth();
         const db = firebase.database();
 
-        // States
         let currentUser = null;
-        let isAdminMode = false;
-        let selectedMode = 'cs';
-        let shopConfig = { isClosed: false, announce: '', rates: {}, workflows: [], links: [] };
+        let isAdmin = false;
+        let currentMode = 'cs';
+        let sysSettings = { rates: {}, workflows: [], links: [], isClosed: false, announce: '' };
 
         // =========================================
-        // CORE NAVIGATION (CUSTOMER)
+        // NAVIGATION & UI
         // =========================================
         function navigate(page) {
-            if(isAdminMode) return;
-            document.querySelectorAll('.page-view').forEach(s => s.classList.add('hidden'));
-            document.getElementById('page-' + page).classList.remove('hidden');
+            if(isAdmin) return;
+            document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden-view'));
+            document.getElementById('p-' + page).classList.remove('hidden-view');
             
-            document.querySelectorAll('.nav-btn').forEach(n => {
-                n.classList.remove('text-blue-600', 'active');
-                n.classList.add('text-gray-400');
-            });
-            const activeNav = document.getElementById('nav-' + page);
-            if(activeNav) {
-                activeNav.classList.add('text-blue-600', 'active');
-                activeNav.classList.remove('text-gray-400');
-            }
+            document.querySelectorAll('#customer-nav div').forEach(n => n.classList.remove('nav-active', 'text-blue-600'));
+            document.getElementById('n-' + page).classList.add('nav-active', 'text-blue-600');
             window.scrollTo(0,0);
         }
 
-        function toggleContactMenu() {
-            document.getElementById('contact-dropdown').classList.toggle('open');
+        function toggleAdminMenu() {
+            document.getElementById('admin-sidebar').classList.toggle('open');
+        }
+
+        function toggleContact() {
+            document.getElementById('contact-panel').classList.toggle('hidden');
         }
 
         // =========================================
-        // PRICING & ORDER LOGIC
+        // SYSTEM LOGIC (CUSTOMER)
         // =========================================
-        function setMode(m) {
-            selectedMode = m;
-            document.getElementById('mode-cs').className = m === 'cs' ? 'py-3 rounded-xl font-bold text-sm bg-white text-blue-600 shadow-sm' : 'py-3 rounded-xl font-bold text-sm text-gray-400';
-            document.getElementById('mode-br').className = m === 'br' ? 'py-3 rounded-xl font-bold text-sm bg-white text-blue-600 shadow-sm' : 'py-3 rounded-xl font-bold text-sm text-gray-400';
-            calc();
+        function selectMode(m) {
+            currentMode = m;
+            document.getElementById('m-cs').className = m === 'cs' ? 'py-2.5 rounded-xl font-bold text-xs bg-white text-blue-600 shadow-sm' : 'py-2.5 rounded-xl font-bold text-xs text-slate-400';
+            document.getElementById('m-br').className = m === 'br' ? 'py-2.5 rounded-xl font-bold text-xs bg-white text-blue-600 shadow-sm' : 'py-2.5 rounded-xl font-bold text-xs text-slate-400';
+            calcPrice();
         }
 
-        function calc() {
-            const target = document.getElementById('ord-target').value;
+        function calcPrice() {
+            const rank = document.getElementById('ord-rank').value;
             const cur = parseInt(document.getElementById('ord-cur').value) || 0;
             const tar = parseInt(document.getElementById('ord-tar').value) || 0;
             const diff = tar - cur;
             let rate = 0;
-            if(selectedMode === 'cs') {
-                rate = shopConfig.rates['cs_'+target] || 0;
-            } else {
-                rate = (target === 'master' || target === 'grand') ? shopConfig.rates.br_high : shopConfig.rates.br_low;
-            }
+
+            if(currentMode === 'cs') rate = sysSettings.rates['cs_'+rank] || 0;
+            else rate = (rank === 'master' || rank === 'grand') ? sysSettings.rates.br_high : sysSettings.rates.br_low;
+
             const total = diff > 0 ? diff * rate : 0;
-            document.getElementById('ord-price').innerText = total.toLocaleString();
+            document.getElementById('ord-total').innerText = total.toLocaleString();
             return total;
         }
 
-        async function submitOrder() {
-            if(shopConfig.isClosed) return Swal.fire('ขออภัย', 'ทางร้านปิดรับออเดอร์อยู่ในขณะนี้', 'error');
+        async function confirmOrder() {
+            if(sysSettings.isClosed) return Swal.fire('ปิดร้าน', 'ขออภัยครับ ร้านปิดรับออเดอร์ชั่วคราว', 'error');
             if(!currentUser) return navigate('login');
-            
-            const price = calc();
-            const gameUID = document.getElementById('ord-uid-game').value;
-            if(price <= 0) return Swal.fire('ผิดพลาด', 'กรุณาระบุจำนวนดาว/แต้มให้ถูกต้อง', 'warning');
-            if(!gameUID) return Swal.fire('ล้มเหลว', 'กรุณากรอก UID เกมของคุณด้วยครับ', 'warning');
-            if(currentUser.balance < price) return Swal.fire('เงินไม่พอ', 'กรุณาเติมเงินเข้าระบบก่อนจ้างงานครับ', 'error');
 
-            const result = await Swal.fire({
-                title: 'ยืนยันจ้างงาน?',
-                text: `ระบบจะหักเงินจำนวน ${price} ฿`,
-                icon: 'question', showCancelButton: true
-            });
+            const price = calcPrice();
+            const gameUID = document.getElementById('ord-gameuid').value;
+            if(price <= 0) return Swal.fire('เตือน', 'กรุณาระบุดาว/แต้มเป้าหมายให้ถูกต้อง', 'warning');
+            if(!gameUID) return Swal.fire('เตือน', 'กรุณากรอก UID เกมด้วยครับ', 'warning');
+            if(currentUser.balance < price) return Swal.fire('เงินไม่พอ', 'กรุณาเติมเงินก่อนสั่งจ้างครับ', 'error');
 
-            if(result.isConfirmed) {
-                const orderId = "ORD-" + Math.random().toString(36).substr(2, 6).toUpperCase();
-                const newOrder = {
-                    id: orderId,
-                    uid: currentUser.uid,
-                    userName: currentUser.name,
-                    gameUID: gameUID,
-                    price: price,
-                    mode: selectedMode === 'cs' ? '4V4 (CS)' : 'แรงค์ใหญ่ (BR)',
+            const res = await Swal.fire({ title: 'ยืนยันจ้างงาน?', text: `หักเงิน ${price} ฿`, icon: 'question', showCancelButton: true });
+            if(res.isConfirmed) {
+                const orderId = "RS-" + Date.now().toString().slice(-6);
+                const orderData = {
+                    id: orderId, uid: currentUser.uid, userName: currentUser.name, gameUID: gameUID,
+                    price: price, mode: currentMode === 'cs' ? '4V4 (CS)' : 'แรงค์ใหญ่ (BR)',
                     detail: `${document.getElementById('ord-cur').value} ➔ ${document.getElementById('ord-tar').value}`,
-                    status: shopConfig.workflows[0] || 'รอดำเนินการ',
-                    statusIndex: 0,
-                    report: 'แอดมินได้รับออเดอร์แล้ว',
-                    timestamp: Date.now()
+                    statusIndex: 0, report: 'รอแอดมินรับงาน...', timestamp: Date.now()
                 };
 
-                db.ref('orders/' + orderId).set(newOrder).then(() => {
+                db.ref('orders/' + orderId).set(orderData).then(() => {
                     db.ref('users/' + currentUser.uid).update({ balance: currentUser.balance - price });
-                    Swal.fire('สำเร็จ', 'บันทึกออเดอร์แล้ว กรุณารอแอดมินดำเนินการ', 'success');
+                    Swal.fire('สำเร็จ', 'บันทึกออเดอร์เรียบร้อย', 'success');
                     navigate('tracking');
                 });
             }
         }
 
         // =========================================
-        // REALTIME LISTENER & UI UPDATES
+        // DATA LOADERS
         // =========================================
-        function initApp() {
-            // Listen to Config
-            db.ref('settings').on('value', snap => {
-                shopConfig = snap.val() || shopConfig;
-                renderUIFromConfig();
-            });
-
-            // Auth State
-            auth.onAuthStateChanged(user => {
-                if(user) {
+        auth.onAuthStateChanged(user => {
+            if(user) {
+                if(user.email === 'adadmin@gmail.com') {
+                    enableAdmin();
+                } else {
                     db.ref('users/' + user.uid).on('value', snap => {
                         currentUser = snap.val();
                         updateCustomerUI();
-                        if(isAdminMode) updateAdminUI();
                     });
-                    loadCustomerTracking();
-                } else {
-                    currentUser = null;
-                    document.getElementById('header-user-info').classList.add('hidden');
-                    document.getElementById('login-btn').classList.remove('hidden');
+                    loadMyTracking();
                 }
-            });
-        }
-
-        function renderUIFromConfig() {
-            // Home Announce
-            document.getElementById('home-announce-text').innerText = shopConfig.announce || 'ยังไม่มีประกาศ';
-            
-            // Shop Status
-            const alert = document.getElementById('shop-close-alert');
-            shopConfig.isClosed ? alert.classList.remove('hidden') : alert.classList.add('hidden');
-
-            // Contact Links
-            const container = document.getElementById('contact-links-container');
-            container.innerHTML = '';
-            if(shopConfig.links) {
-                shopConfig.links.forEach(l => {
-                    if(!l.active) return;
-                    container.innerHTML += `
-                        <a href="${l.url}" target="_blank" class="flex items-center gap-3 p-2 bg-slate-50 rounded-xl hover:bg-blue-50 transition border border-transparent hover:border-blue-200">
-                            <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600"><i class="${l.icon}"></i></div>
-                            <span class="text-xs font-bold">${l.name}</span>
-                        </a>
-                    `;
-                });
+            } else {
+                currentUser = null;
+                document.getElementById('user-info-box').classList.add('hidden-view');
+                document.getElementById('login-nav-btn').classList.remove('hidden-view');
             }
+        });
+
+        db.ref('settings').on('value', snap => {
+            sysSettings = snap.val() || sysSettings;
+            renderSystem();
+        });
+
+        function renderSystem() {
+            // Home Display
+            document.getElementById('announcement-area').innerText = sysSettings.announce || 'ไม่มีประกาศในขณะนี้';
+            sysSettings.isClosed ? document.getElementById('shop-closed-banner').classList.remove('hidden-view') : document.getElementById('shop-closed-banner').classList.add('hidden-view');
+            
+            // Contact Links
+            const list = document.getElementById('admin-links-list');
+            list.innerHTML = "";
+            (sysSettings.links || []).forEach(l => {
+                if(!l.active) return;
+                list.innerHTML += `<a href="${l.url}" target="_blank" class="flex items-center gap-2 p-2 hover:bg-blue-50 rounded-lg transition text-xs font-bold"><i class="${l.icon} text-blue-500"></i> ${l.name}</a>`;
+            });
         }
 
         function updateCustomerUI() {
             if(!currentUser) return;
-            document.getElementById('header-user-info').classList.remove('hidden');
-            document.getElementById('login-btn').classList.add('hidden');
+            document.getElementById('user-info-box').classList.remove('hidden-view');
+            document.getElementById('login-nav-btn').classList.add('hidden-view');
             document.getElementById('header-balance').innerText = currentUser.balance.toLocaleString() + ' ฿';
-            document.getElementById('user-avatar').innerText = currentUser.name.charAt(0);
-
-            // Profile Page
-            document.getElementById('prof-avatar').innerText = currentUser.name.charAt(0);
-            document.getElementById('prof-name').innerText = currentUser.name;
-            document.getElementById('prof-email').innerText = currentUser.email;
-            document.getElementById('prof-balance').innerText = currentUser.balance.toLocaleString() + ' ฿';
+            document.getElementById('header-initial').innerText = currentUser.name.charAt(0);
+            
+            document.getElementById('p-name').innerText = currentUser.name;
+            document.getElementById('p-email').innerText = currentUser.email;
+            document.getElementById('p-balance').innerText = currentUser.balance.toLocaleString() + ' ฿';
         }
 
-        function loadCustomerTracking() {
-            db.ref('orders').orderByChild('uid').equalTo(currentUser.uid).on('value', snap => {
-                const container = document.getElementById('tracking-container');
-                container.innerHTML = '';
-                if(!snap.exists()) {
-                    container.innerHTML = `<div class="text-center py-10 text-gray-300">ไม่มีออเดอร์ที่กำลังดำเนินการ</div>`;
-                    return;
-                }
-                
+        function loadMyTracking() {
+            db.ref('orders').orderByChild('uid').equalTo(auth.currentUser.uid).on('value', snap => {
+                const container = document.getElementById('tracking-list');
+                container.innerHTML = "";
+                if(!snap.exists()) return container.innerHTML = `<p class="text-center py-20 text-slate-300">ไม่พบรายการสั่งจ้างของคุณ</p>`;
+
                 snap.forEach(c => {
                     const o = c.val();
-                    if(o.status === 'สำเร็จ') return;
-
-                    const totalSteps = shopConfig.workflows.length;
+                    const totalSteps = (sysSettings.workflows || []).length || 1;
                     const percent = ((o.statusIndex + 1) / totalSteps) * 100;
-
+                    
                     let stepsHtml = '';
-                    shopConfig.workflows.forEach((s, idx) => {
-                        const isActive = idx <= o.statusIndex;
-                        stepsHtml += `
-                            <div class="flex flex-col items-center">
-                                <div class="step-node ${isActive ? 'active' : ''}">${idx + 1}</div>
-                                <span class="step-label">${s}</span>
-                            </div>
-                        `;
+                    (sysSettings.workflows || []).forEach((s, i) => {
+                        stepsHtml += `<div class="step-item ${i <= o.statusIndex ? 'active' : ''}"><div class="step-icon">${i+1}</div><div class="step-text">${s}</div></div>`;
                     });
 
                     container.innerHTML += `
-                        <div class="glass p-6 rounded-[2rem] border-l-8 border-blue-500 animate__animated animate__fadeInUp">
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <h4 class="font-bold text-lg">${o.mode}</h4>
-                                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">ORDER ID: ${o.id}</p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-sm font-bold text-blue-600">${o.price} ฿</p>
-                                    <p class="text-[9px] text-gray-400">UID: ${o.gameUID}</p>
-                                </div>
+                        <div class="card-custom p-6 border-l-8 border-blue-500 animate__animated animate__fadeInUp">
+                            <div class="flex justify-between mb-4">
+                                <div><h4 class="font-bold text-lg">${o.mode}</h4><p class="text-[10px] text-slate-400">UID: ${o.gameUID}</p></div>
+                                <div class="text-right text-sm font-bold text-blue-600">${o.price} ฿</div>
                             </div>
-                            
-                            <div class="stepper-container mt-6">
-                                <div class="stepper-line"></div>
-                                <div class="stepper-line-active" style="width: ${percent}%"></div>
+                            <div class="stepper">
+                                <div class="progress-line" style="width: ${percent}%"></div>
                                 ${stepsHtml}
                             </div>
-
-                            <div class="mt-8 bg-blue-50 p-4 rounded-2xl flex items-center gap-3">
-                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-500"><i class="fas fa-comment-dots"></i></div>
-                                <div>
-                                    <p class="text-[10px] font-bold text-blue-400 uppercase">อัปเดตจากแอดมิน</p>
-                                    <p class="text-xs font-bold text-slate-700">${o.report}</p>
-                                </div>
+                            <div class="mt-8 p-4 bg-blue-50 rounded-2xl flex gap-3 items-center">
+                                <i class="fas fa-info-circle text-blue-500"></i>
+                                <div><p class="text-[9px] font-bold text-blue-400 uppercase">สถานะล่าสุด</p><p class="text-xs font-bold">${o.report}</p></div>
                             </div>
                         </div>
                     `;
@@ -528,172 +426,98 @@
         }
 
         // =========================================
-        // ADMIN CORE LOGIC (900+ Line Complexity)
+        // ADMIN CORE (V7 REBUILT)
         // =========================================
-        function processLogin() {
-            const e = document.getElementById('log-email').value;
-            const p = document.getElementById('log-pass').value;
-            if(e === 'adad' && p === 'Fafa 11238') {
-                enableAdminMode();
-                return;
-            }
-            auth.signInWithEmailAndPassword(e, p).then(() => {
-                Swal.fire('สำเร็จ', 'ยินดีต้อนรับกลับครับ', 'success');
-                navigate('home');
-            }).catch(() => Swal.fire('ผิดพลาด', 'อีเมลหรือรหัสผ่านไม่ถูกต้อง', 'error'));
-        }
-
-        function enableAdminMode() {
-            isAdminMode = true;
+        function enableAdmin() {
+            isAdmin = true;
             document.body.classList.add('admin-active');
-            document.getElementById('customer-header').classList.add('hidden');
-            document.getElementById('customer-nav').classList.add('hidden');
+            document.getElementById('customer-header').classList.add('hidden-view');
+            document.getElementById('customer-nav').classList.add('hidden-view');
             document.getElementById('admin-sidebar').classList.add('open');
-            document.getElementById('view-container').classList.replace('max-w-lg', 'max-w-none');
-            document.getElementById('view-container').style.marginLeft = '280px';
-            document.getElementById('admin-view-root').classList.remove('hidden');
-            document.querySelectorAll('.page-view').forEach(s => s.classList.add('hidden'));
-            
-            adminTab('dash');
-            renderShopToggle();
+            document.getElementById('main-content').classList.replace('max-w-lg', 'max-w-5xl');
+            document.getElementById('admin-view-root').classList.remove('hidden-view');
+            document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden-view'));
+            adminGo('dash');
         }
 
-        function adminTab(tab) {
+        function adminGo(tab) {
             const root = document.getElementById('admin-view-root');
-            document.querySelectorAll('.admin-link').forEach(l => l.classList.remove('active', 'bg-blue-600', 'text-white'));
-            event.currentTarget?.classList.add('active', 'bg-blue-600', 'text-white');
+            let html = `<h1 class="text-3xl font-bold mb-8">Admin / ${tab.toUpperCase()}</h1>`;
 
-            let html = `<h1 class="text-3xl font-bold mb-8 uppercase tracking-widest text-slate-800">ระบบจัดการ: ${tab}</h1>`;
-            
             if(tab === 'dash') {
                 html += `
-                    <div class="grid grid-cols-4 gap-6">
-                        <div class="glass p-8 rounded-[2rem] border-b-8 border-blue-500 shadow-sm">
-                            <p class="text-sm font-bold text-gray-400 mb-2">ยอดออเดอร์วันนี้</p>
-                            <h4 id="adm-stat-today" class="text-4xl font-black">0</h4>
-                        </div>
-                        <div class="glass p-8 rounded-[2rem] border-b-8 border-orange-500 shadow-sm">
-                            <p class="text-sm font-bold text-gray-400 mb-2">ออเดอร์ค้าง</p>
-                            <h4 id="adm-stat-pending" class="text-4xl font-black">0</h4>
-                        </div>
-                        <div class="glass p-8 rounded-[2rem] border-b-8 border-green-500 shadow-sm">
-                            <p class="text-sm font-bold text-gray-400 mb-2">รายได้รวม</p>
-                            <h4 id="adm-stat-income" class="text-4xl font-black">0 ฿</h4>
-                        </div>
-                        <div class="glass p-8 rounded-[2rem] border-b-8 border-purple-500 shadow-sm">
-                            <p class="text-sm font-bold text-gray-400 mb-2">ลูกค้าทั้งหมด</p>
-                            <h4 id="adm-stat-users" class="text-4xl font-black">0</h4>
-                        </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+                        <div class="card-custom p-8 border-b-4 border-blue-500 shadow-sm"><p class="text-xs font-bold text-slate-400 uppercase">งานรอคิว</p><h2 id="adm-p" class="text-4xl font-black mt-2">0</h2></div>
+                        <div class="card-custom p-8 border-b-4 border-green-500 shadow-sm"><p class="text-xs font-bold text-slate-400 uppercase">งานสำเร็จ</p><h2 id="adm-s" class="text-4xl font-black mt-2">0</h2></div>
+                        <div class="card-custom p-8 border-b-4 border-orange-500 shadow-sm"><p class="text-xs font-bold text-slate-400 uppercase">ยอดเติมเงิน</p><h2 id="adm-i" class="text-4xl font-black mt-2">0 ฿</h2></div>
+                        <div class="card-custom p-8 border-b-4 border-slate-900 shadow-sm"><p class="text-xs font-bold text-slate-400 uppercase">ลูกค้า</p><h2 id="adm-u" class="text-4xl font-black mt-2">0</h2></div>
                     </div>
                 `;
-                loadAdminStats();
+                loadAdmStats();
             } else if(tab === 'orders') {
                 html += `
-                    <div class="glass p-4 rounded-3xl mb-6 flex gap-4">
-                        <input type="text" id="order-search" placeholder="ค้นหาตาม ORDER ID หรือ ชื่อลูกค้า..." class="flex-1">
-                        <button onclick="searchOrders()" class="bg-blue-600 text-white px-8 rounded-xl font-bold">ค้นหา</button>
-                    </div>
-                    <div id="admin-orders-list" class="space-y-4 pb-20"></div>
+                    <div class="card-custom p-4 mb-6 flex gap-4"><input type="text" id="ord-search" placeholder="ค้นหาตาม ID หรือ ชื่อ..." class="flex-1"></div>
+                    <div id="adm-orders-list" class="space-y-4"></div>
                 `;
-                loadAdminOrders();
-            } else if(tab === 'workflow') {
+                loadAdmOrders();
+            } else if(tab === 'settings') {
                 html += `
-                    <div class="glass p-10 rounded-[2.5rem] max-w-2xl">
-                        <h3 class="font-bold mb-4">ตั้งค่าขั้นตอนสถานะ (Workflow)</h3>
-                        <p class="text-xs text-gray-400 mb-6">พิมพ์ลำดับขั้นตอนโดยคั่นด้วยเครื่องหมายคอมม่า (,) เช่น: รับออเดอร์, กำลังเข้าเกม, กำลังดันแรงค์, ใกล้เสร็จแล้ว</p>
-                        <textarea id="set-workflows" class="w-full h-32 p-4 border-2 rounded-2xl mb-4">${shopConfig.workflows.join(', ')}</textarea>
-                        <button onclick="saveWorkflow()" class="btn-grad px-10 py-4 font-bold">บันทึกขั้นตอนงาน</button>
-                    </div>
-                `;
-            } else if(tab === 'announce') {
-                html += `
-                    <div class="grid grid-cols-2 gap-8">
-                        <div class="glass p-10 rounded-[2.5rem]">
-                            <h3 class="font-bold mb-4">ระบบประกาศ (หน้าแรก)</h3>
-                            <textarea id="set-announce" class="w-full h-40 p-4 border-2 rounded-2xl mb-4">${shopConfig.announce}</textarea>
-                            <button onclick="saveAnnounce()" class="btn-grad px-10 py-4 font-bold">อัปเดตประกาศ</button>
-                        </div>
-                        <div class="glass p-10 rounded-[2.5rem]">
-                            <h3 class="font-bold mb-4">ลิงก์ติดต่อ (สูงสุด 2 อัน)</h3>
-                            <div id="links-editor" class="space-y-4 mb-6"></div>
-                            <button onclick="saveLinks()" class="btn-grad px-10 py-4 font-bold">บันทึกการตั้งค่าลิงก์</button>
-                        </div>
-                    </div>
-                `;
-                renderLinksEditor();
-            } else if(tab === 'rates') {
-                html += `
-                    <div class="glass p-10 rounded-[2.5rem]">
-                        <div class="grid grid-cols-2 gap-10">
-                            <div class="space-y-4">
-                                <h4 class="font-bold text-blue-600 border-b pb-2">เรทราคา 4V4 (CS)</h4>
-                                <div>ต่ำกว่าแดง: <input type="number" id="r-cs-low" value="${shopConfig.rates.cs_low || 0}"></div>
-                                <div>แรงค์แดง: <input type="number" id="r-cs-red" value="${shopConfig.rates.cs_red || 0}"></div>
-                                <div>มาสเตอร์: <input type="number" id="r-cs-master" value="${shopConfig.rates.cs_master || 0}"></div>
-                                <div>แกรนด์: <input type="number" id="r-cs-grand" value="${shopConfig.rates.cs_grand || 0}"></div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="card-custom p-8 space-y-4">
+                            <h3 class="font-bold border-b pb-2">📦 ตั้งค่ารับออเดอร์</h3>
+                            <div class="flex items-center justify-between p-3 bg-slate-100 rounded-xl">
+                                <span>เปิด-ปิดรับออเดอร์</span>
+                                <button onclick="toggleShop()" class="w-12 h-6 rounded-full relative transition ${sysSettings.isClosed ? 'bg-red-500' : 'bg-green-500'}">
+                                    <div class="absolute w-4 h-4 bg-white rounded-full top-1 transition-all ${sysSettings.isClosed ? 'right-1' : 'left-1'}"></div>
+                                </button>
                             </div>
-                            <div class="space-y-4">
-                                <h4 class="font-bold text-orange-600 border-b pb-2">เรทราคา แรงค์ใหญ่ (BR)</h4>
-                                <div>ทั่วไป: <input type="number" id="r-br-low" value="${shopConfig.rates.br_low || 0}"></div>
-                                <div>มาสเตอร์+: <input type="number" id="r-br-high" value="${shopConfig.rates.br_high || 0}"></div>
-                            </div>
+                            <textarea id="set-ann" class="h-32" placeholder="พิมพ์ประกาศหน้าร้าน...">${sysSettings.announce}</textarea>
+                            <button onclick="saveAnn()" class="btn-blue w-full py-3">บันทึกประกาศ</button>
                         </div>
-                        <button onclick="saveRates()" class="btn-grad mt-10 px-12 py-4 font-bold">ยืนยันและบันทึกราคา</button>
+                        <div class="card-custom p-8 space-y-4">
+                            <h3 class="font-bold border-b pb-2">💰 เรทราคา & ลำดับงาน</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <input type="number" id="s-cs-low" value="${sysSettings.rates.cs_low || 0}" placeholder="4V4 ต่ำกว่าแดง">
+                                <input type="number" id="s-cs-red" value="${sysSettings.rates.cs_red || 0}" placeholder="4V4 แดง">
+                                <input type="number" id="s-cs-master" value="${sysSettings.rates.cs_master || 0}" placeholder="4V4 มาสเตอร์">
+                                <input type="number" id="s-cs-grand" value="${sysSettings.rates.cs_grand || 0}" placeholder="4V4 แกรนด์">
+                                <input type="number" id="s-br-low" value="${sysSettings.rates.br_low || 0}" placeholder="BR ทั่วไป">
+                                <input type="number" id="s-br-high" value="${sysSettings.rates.br_high || 0}" placeholder="BR สูง">
+                            </div>
+                            <input type="text" id="s-wf" value="${(sysSettings.workflows || []).join(', ')}" placeholder="ขั้นตอน (คั่นด้วยคอมม่า เช่น รับงาน, เริ่มเล่น, จบงาน)">
+                            <button onclick="saveSys()" class="btn-blue w-full py-3">บันทึกเรทและขั้นตอน</button>
+                        </div>
                     </div>
                 `;
-            } else if(tab === 'users') {
-                html += `
-                    <div class="glass p-4 rounded-3xl mb-6 flex gap-4">
-                        <input type="text" id="user-search" placeholder="ค้นหาตามชื่อ หรือ อีเมลลูกค้า..." class="flex-1">
-                        <button onclick="searchUsers()" class="bg-blue-600 text-white px-8 rounded-xl font-bold">ค้นหา</button>
-                    </div>
-                    <div id="admin-users-list" class="grid grid-cols-2 gap-4"></div>
-                `;
-                loadAdminUsers();
             }
 
             root.innerHTML = html;
         }
 
-        // =========================================
-        // ADMIN ACTIONS
-        // =========================================
-        function loadAdminOrders() {
+        function loadAdmOrders() {
             db.ref('orders').on('value', snap => {
-                const list = document.getElementById('admin-orders-list');
-                if(!list) return;
-                list.innerHTML = '';
+                const container = document.getElementById('adm-orders-list');
+                if(!container) return;
+                container.innerHTML = "";
                 snap.forEach(c => {
                     const o = c.val();
-                    if(o.status === 'สำเร็จ') return;
+                    if(o.statusIndex === 99) return; // Hide completed history
 
                     let btnHtml = '';
-                    shopConfig.workflows.forEach((s, i) => {
-                        btnHtml += `<button onclick="updateOrderStatus('${o.id}', ${i})" class="px-3 py-2 text-[10px] font-bold rounded-lg ${o.statusIndex === i ? 'bg-blue-600 text-white' : 'bg-slate-100 text-gray-400'}">${s}</button>`;
+                    (sysSettings.workflows || []).forEach((s, i) => {
+                        btnHtml += `<button onclick="updOrd('${o.id}', ${i})" class="px-2 py-1.5 text-[10px] font-bold rounded-lg ${o.statusIndex === i ? 'bg-blue-600 text-white' : 'bg-slate-100'}">${s}</button>`;
                     });
 
-                    list.innerHTML += `
-                        <div class="glass p-8 rounded-[2rem] border shadow-sm flex flex-col gap-6">
+                    container.innerHTML += `
+                        <div class="card-custom p-6 space-y-4">
                             <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="text-xl font-bold">${o.userName} <span class="text-xs text-gray-400 font-normal">(${o.id})</span></h4>
-                                    <p class="text-sm text-blue-600 font-bold">${o.mode}: ${o.detail}</p>
-                                    <p class="text-xs bg-slate-100 p-2 rounded-lg mt-2 inline-block">GAME UID: <b>${o.gameUID}</b></p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-lg font-black">${o.price} ฿</p>
-                                    <button onclick="finishOrder('${o.id}')" class="mt-2 bg-green-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-green-100">เสร็จสิ้นงาน ✅</button>
-                                </div>
+                                <div><h4 class="font-bold">${o.userName} (${o.id})</h4><p class="text-xs text-blue-600 font-bold">${o.mode}: ${o.detail}</p><p class="text-xs text-slate-400">UID: ${o.gameUID}</p></div>
+                                <div class="text-right"><p class="text-xl font-black">${o.price} ฿</p><button onclick="updOrd('${o.id}', 99)" class="text-[10px] font-bold text-green-500 uppercase">ปิดงาน ✅</button></div>
                             </div>
-                            
-                            <div>
-                                <p class="text-[10px] font-bold text-gray-400 mb-2">คลิกเพื่อเปลี่ยนสถานะอัตโนมัติ:</p>
-                                <div class="flex flex-wrap gap-2">${btnHtml}</div>
-                            </div>
-
+                            <div class="flex flex-wrap gap-2 pt-2 border-t">${btnHtml}</div>
                             <div class="flex gap-2">
-                                <input type="text" id="report-${o.id}" value="${o.report}" placeholder="พิมพ์รายงานลูกค้าสดๆ..." class="flex-1 text-sm">
-                                <button onclick="sendRealtimeReport('${o.id}')" class="bg-slate-800 text-white px-6 rounded-xl text-xs">ส่งรายงาน</button>
+                                <input type="text" id="rep-${o.id}" value="${o.report}" class="flex-1 text-xs">
+                                <button onclick="sendRep('${o.id}')" class="bg-slate-900 text-white px-4 rounded-xl text-xs">อัปเดต</button>
                             </div>
                         </div>
                     `;
@@ -701,60 +525,51 @@
             });
         }
 
-        function updateOrderStatus(id, index) {
-            db.ref('orders/' + id).update({
-                status: shopConfig.workflows[index],
-                statusIndex: index,
-                report: 'สถานะถูกปรับเป็น: ' + shopConfig.workflows[index]
+        function updOrd(id, idx) { db.ref('orders/'+id).update({ statusIndex: idx }); }
+        function sendRep(id) { db.ref('orders/'+id).update({ report: document.getElementById('rep-'+id).value }); }
+
+        function toggleShop() { db.ref('settings/isClosed').set(!sysSettings.isClosed); }
+        function saveAnn() { db.ref('settings/announce').set(document.getElementById('set-ann').value); }
+        function saveSys() {
+            const data = {
+                rates: {
+                    cs_low: parseInt(document.getElementById('s-cs-low').value),
+                    cs_red: parseInt(document.getElementById('s-cs-red').value),
+                    cs_master: parseInt(document.getElementById('s-cs-master').value),
+                    cs_grand: parseInt(document.getElementById('s-cs-grand').value),
+                    br_low: parseInt(document.getElementById('s-br-low').value),
+                    br_high: parseInt(document.getElementById('s-br-high').value),
+                },
+                workflows: document.getElementById('s-wf').value.split(',').map(s => s.trim())
+            };
+            db.ref('settings').update(data).then(() => Swal.fire('สำเร็จ', 'บันทึกการตั้งค่าแล้ว', 'success'));
+        }
+
+        function handleLogin() {
+            const e = document.getElementById('log-email').value;
+            const p = document.getElementById('log-pass').value;
+            auth.signInWithEmailAndPassword(e, p).then(() => {
+                Swal.fire('สำเร็จ', 'ยินดีต้อนรับ', 'success');
+                navigate('home');
+            }).catch(err => Swal.fire('ล้มเหลว', 'อีเมลหรือรหัสผ่านผิด', 'error'));
+        }
+
+        function handleRegister() {
+            const n = document.getElementById('reg-name').value;
+            const e = document.getElementById('reg-email').value;
+            const p = document.getElementById('reg-pass').value;
+            const f = document.getElementById('reg-fb').value;
+
+            auth.createUserWithEmailAndPassword(e, p).then(res => {
+                db.ref('users/' + res.user.uid).set({ uid: res.user.uid, name: n, email: e, fb: f, balance: 0 });
+                Swal.fire('สำเร็จ', 'สมัครสมาชิกเรียบร้อย', 'success');
+                navigate('home');
             });
         }
 
-        function sendRealtimeReport(id) {
-            const msg = document.getElementById('report-' + id).value;
-            db.ref('orders/' + id).update({ report: msg }).then(() => {
-                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'ส่งรายงานแล้ว', showConfirmButton: false, timer: 1500 });
-            });
-        }
+        function logout() { auth.signOut().then(() => location.reload()); }
 
-        function finishOrder(id) {
-            db.ref('orders/' + id).update({ status: 'สำเร็จ', report: 'ดำเนินการเสร็จสิ้นเรียบร้อยแล้วครับ ✅' });
-        }
-
-        function saveWorkflow() {
-            const val = document.getElementById('set-workflows').value;
-            const arr = val.split(',').map(s => s.trim());
-            db.ref('settings/workflows').set(arr).then(() => Swal.fire('สำเร็จ', 'บันทึกขั้นตอนงานแล้ว', 'success'));
-        }
-
-        function saveAnnounce() {
-            const val = document.getElementById('set-announce').value;
-            db.ref('settings/announce').set(val).then(() => Swal.fire('สำเร็จ', 'อัปเดตประกาศแล้ว', 'success'));
-        }
-
-        function renderShopToggle() {
-            const container = document.getElementById('shop-toggle-container');
-            container.innerHTML = `
-                <div class="flex items-center justify-between p-3 bg-slate-800 rounded-xl border border-slate-700">
-                    <span class="text-xs font-bold text-gray-300">เปิดรับออเดอร์</span>
-                    <button onclick="toggleShop()" class="w-12 h-6 rounded-full relative transition ${shopConfig.isClosed ? 'bg-red-500' : 'bg-green-500'}">
-                        <div class="absolute w-4 h-4 bg-white rounded-full top-1 transition-all ${shopConfig.isClosed ? 'left-1' : 'right-1'}"></div>
-                    </button>
-                </div>
-            `;
-        }
-
-        function toggleShop() {
-            db.ref('settings/isClosed').set(!shopConfig.isClosed);
-        }
-
-        function logout() {
-            auth.signOut().then(() => location.reload());
-        }
-
-        // Initialize Everything
-        initApp();
-        setMode('cs');
-
+        navigate('home');
     </script>
 </body>
 </html>
