@@ -3,706 +3,612 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RS RUPDAN V8 - Ultimate Management System</title>
+    <title>RS RUPDAN V9 - รับดันเเรงค์ฟีฟาย</title>
 
-    <!-- External Assets -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600;700&family=Poppins:wght@600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
     <style>
-        /* Modern UI Config */
+        /* ============================================================
+           1. CSS VARIABLES & CORE THEME
+           ============================================================ */
         :root {
-            --primary: #3b82f6;
-            --primary-dark: #1d4ed8;
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.5);
+            --secondary: #0f172a;
             --accent: #f59e0b;
-            --bg-body: #f8fafc;
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --glass-border: rgba(255, 255, 255, 0.3);
-            --admin-bg: #0f172a;
+            --danger: #ef4444;
+            --success: #10b981;
+            --bg-body: #020617;
+            --card-glass: rgba(15, 23, 42, 0.8);
+            --border-glass: rgba(255, 255, 255, 0.1);
+            --nav-height: 70px;
         }
 
         * {
             font-family: 'Kanit', sans-serif;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) transparent;
         }
 
         body {
             background-color: var(--bg-body);
-            color: #1e293b;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.1) 0px, transparent 50%);
+            color: #f8fafc;
             margin: 0;
             padding: 0;
             overflow-x: hidden;
             min-height: 100vh;
         }
 
-        /* Scrollbar Styling */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
 
-        /* Animation Keyframes */
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+        /* ============================================================
+           2. ADVANCED ANIMATIONS
+           ============================================================ */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
 
-        /* Glassmorphism Classes */
-        .glass-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-            border-radius: 28px;
+        @keyframes neonGlow {
+            0%, 100% { box-shadow: 0 0 10px var(--primary-glow); }
+            50% { box-shadow: 0 0 25px var(--primary-glow); }
         }
 
-        .admin-sidebar {
-            width: 280px;
-            height: 100vh;
-            background: var(--admin-bg);
-            position: fixed;
-            left: -280px;
-            top: 0;
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .animate-float { animation: float 4s ease-in-out infinite; }
+        .neon-border { border: 1px solid var(--primary); animation: neonGlow 3s infinite; }
+
+        /* ============================================================
+           3. UI COMPONENTS (GLASSMORPHISM 2.0)
+           ============================================================ */
+        .glass-panel {
+            background: var(--card-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 32px;
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 2px solid var(--border-glass) !important;
+            border-radius: 20px !important;
+            color: white !important;
+            padding: 16px 20px !important;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 2000;
-            color: white;
-            box-shadow: 10px 0 30px rgba(0,0,0,0.2);
         }
 
-        .admin-sidebar.active { left: 0; }
+        .glass-input:focus {
+            border-color: var(--primary) !important;
+            background: rgba(99, 102, 241, 0.05) !important;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
+        }
 
-        /* Input Styles - Fixed Overflow & Modern Floating Labels */
-        .input-group {
+        .btn-premium {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
             position: relative;
-            margin-bottom: 1.5rem;
-        }
-
-        .modern-input {
-            width: 100%;
-            padding: 14px 18px;
-            background: #fff;
-            border: 2px solid #e2e8f0;
-            border-radius: 16px;
-            font-size: 15px;
+            overflow: hidden;
             transition: all 0.3s;
-            outline: none;
+            border-radius: 20px;
         }
 
-        .modern-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-        }
-
-        .floating-label {
+        .btn-premium::after {
+            content: '';
             position: absolute;
-            left: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: transparent;
-            padding: 0 4px;
-            color: #94a3b8;
-            pointer-events: none;
-            transition: 0.3s;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
         }
 
-        .modern-input:focus + .floating-label,
-        .modern-input:not(:placeholder-shown) + .floating-label {
-            top: 0;
-            font-size: 12px;
-            background: #fff;
-            color: var(--primary);
-            font-weight: bold;
-        }
+        .btn-premium:hover::after { left: 100%; }
+        .btn-premium:active { transform: scale(0.96); }
 
-        /* Buttons */
-        .btn-gradient {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-            padding: 14px 24px;
-            border-radius: 18px;
-            font-weight: 600;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
-        }
-
-        .btn-gradient:active { transform: scale(0.96); }
-
-        /* Bottom Nav */
-        .bottom-nav {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 40px);
-            max-width: 450px;
-            height: 70px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 25px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            z-index: 1000;
-            border: 1px solid rgba(255,255,255,0.5);
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            color: #94a3b8;
-            transition: 0.3s;
-            cursor: pointer;
-        }
-
-        .nav-item.active { color: var(--primary); }
-        .nav-item i { font-size: 20px; }
-        .nav-item span { font-size: 10px; font-weight: bold; }
-
-        /* Status Stepper */
-        .stepper-container {
+        /* Status Stepper Food Style */
+        .order-progress {
             display: flex;
             justify-content: space-between;
             position: relative;
-            padding: 20px 0;
+            margin: 30px 0;
         }
 
-        .stepper-line {
+        .progress-track {
             position: absolute;
-            top: 40px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: #e2e8f0;
-            z-index: 1;
+            top: 18px; left: 0; right: 0;
+            height: 4px; background: rgba(255,255,255,0.05);
+            z-index: 1; border-radius: 10px;
         }
 
-        .stepper-progress {
+        .progress-fill {
             position: absolute;
-            top: 40px;
-            left: 0;
-            height: 3px;
-            background: var(--primary);
-            z-index: 2;
-            transition: width 0.5s ease;
+            top: 18px; left: 0; height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            z-index: 2; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 10px;
+            box-shadow: 0 0 15px var(--primary-glow);
         }
 
-        .step-node {
-            width: 40px;
-            height: 40px;
-            background: #fff;
-            border: 3px solid #e2e8f0;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            z-index: 3;
-            transition: 0.4s;
+        .step-dot {
+            width: 40px; height: 40px;
+            background: var(--secondary);
+            border: 3px solid rgba(255,255,255,0.05);
+            border-radius: 15px;
+            display: flex; align-items: center; justify-content: center;
+            position: relative; z-index: 3; transition: 0.4s;
+            color: #475569;
         }
 
-        .step-node.active {
+        .step-dot.active {
             border-color: var(--primary);
             background: var(--primary);
             color: white;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+            transform: scale(1.15) rotate(10deg);
+            box-shadow: 0 0 20px var(--primary-glow);
         }
 
-        /* Hidden Views */
-        .view-section { display: none; padding-bottom: 120px; }
-        .view-section.active { display: block; animation: fadeInScale 0.4s ease; }
-
-        /* Admin UI Utilities */
-        .admin-content { margin-left: 0; transition: 0.4s; padding: 30px; }
-        .admin-active .admin-content { margin-left: 280px; }
-
-        @media (max-width: 1024px) {
-            .admin-active .admin-content { margin-left: 0; }
-        }
-
-        .card-stat {
-            background: white;
-            padding: 24px;
-            border-radius: 24px;
-            border-bottom: 5px solid var(--primary);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-        }
-
-        /* Responsive Fixes */
-        .container-custom { width: 100%; max-width: 500px; margin: 0 auto; padding: 20px; }
-        .container-admin { width: 100%; max-width: 1200px; margin: 0 auto; }
-
-        /* Floating Refresh Button */
-        .refresh-btn {
-            position: fixed;
-            right: 20px;
-            bottom: 100px;
-            width: 50px;
-            height: 50px;
-            background: var(--primary);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            z-index: 999;
+        /* Admin Action Buttons */
+        .action-chip {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.2s;
         }
-        .refresh-btn:hover { transform: rotate(180deg); }
+
+        /* ============================================================
+           4. VIEW MANAGEMENT
+           ============================================================ */
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeInUp 0.5s ease; }
+
+        .admin-sidebar {
+            width: 280px; height: 100vh;
+            background: #020617; position: fixed;
+            left: -280px; top: 0; z-index: 2000;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-right: 1px solid var(--border-glass);
+        }
+        .admin-sidebar.active { left: 0; }
+
+        /* ============================================================
+           5. MOBILE NAVIGATION
+           ============================================================ */
+        .tab-bar {
+            position: fixed; bottom: 25px; left: 50%;
+            transform: translateX(-50%);
+            width: 90%; max-width: 400px;
+            height: 75px; background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 1500; border: 1px solid var(--border-glass);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .tab-item {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 4px; color: #64748b; cursor: pointer; transition: 0.3s;
+        }
+        .tab-item.active { color: var(--primary); }
+        .tab-item i { font-size: 20px; transition: 0.3s; }
+        .tab-item.active i { transform: translateY(-5px); }
+        .tab-item span { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
 
     </style>
 </head>
 <body class="admin-inactive">
 
-    <!-- REFRESH BUTTON -->
-    <div class="refresh-btn" onclick="syncData()">
-        <i class="fas fa-sync-alt"></i>
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-950 z-[9999] flex items-center justify-center transition-all duration-700">
+        <div class="text-center">
+            <div class="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <h2 class="text-xl font-bold tracking-widest text-indigo-400 animate-pulse">RS RUPDAN</h2>
+            <p class="text-xs text-slate-500 mt-2">กำลังเชื่อมต่อระบบ V9 Ultimate...</p>
+        </div>
     </div>
 
-    <!-- MAIN HEADER -->
-    <header id="main-header" class="sticky top-0 bg-white/80 backdrop-blur-md z-[1001] border-b border-slate-100 py-4 px-6">
-        <div class="max-w-5xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg">R</div>
+    <header class="sticky top-0 z-[1001] bg-slate-950/50 backdrop-blur-xl border-b border-white/5 py-4 px-6">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-4 group cursor-pointer" onclick="goPage('home')">
+                <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-xl group-hover:rotate-12 transition-transform">
+                    <span class="text-2xl font-black text-white italic">R</span>
+                </div>
                 <div>
-                    <h1 class="text-lg font-bold leading-none">RS RUPDAN</h1>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Version 8 Ultimate</p>
+                    <h1 class="text-xl font-black tracking-tighter text-white">RS RUPDAN</h1>
+                    <div class="flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Server: Online</p>
+                    </div>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <div id="header-user-status" class="hidden flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
-                    <span id="header-balance" class="text-sm font-bold text-blue-600">0.00 ฿</span>
-                    <div class="w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center text-white text-[10px] font-bold" id="header-avatar">?</div>
+            
+            <div class="flex items-center gap-3">
+                <div id="user-status-widget" class="hidden flex items-center gap-3 bg-white/5 p-1.5 pr-4 rounded-full border border-white/10">
+                    <div id="header-avatar" class="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center font-bold text-xs">?</div>
+                    <div>
+                        <p class="text-[8px] text-slate-400 font-bold uppercase leading-none">Wallet</p>
+                        <p id="header-bal" class="text-sm font-black text-indigo-400">0.00 ฿</p>
+                    </div>
                 </div>
-                <button id="admin-toggle-btn" onclick="toggleAdminSidebar()" class="hidden w-10 h-10 bg-slate-900 text-white rounded-full flex items-center justify-center">
-                    <i class="fas fa-cog"></i>
+                <button id="btn-admin-panel" onclick="toggleSidebar()" class="hidden w-11 h-11 bg-slate-900 rounded-2xl flex items-center justify-center hover:bg-slate-800 transition">
+                    <i class="fas fa-grid-2 text-indigo-400"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- ADMIN SIDEBAR -->
-    <nav id="admin-sidebar" class="admin-sidebar">
-        <div class="p-8 border-b border-slate-800 flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white"><i class="fas fa-user-shield"></i></div>
-            <div>
-                <h3 class="font-bold">ADMIN PANEL</h3>
-                <p class="text-[10px] text-slate-500">System Management</p>
-            </div>
+    <nav id="admin-sidebar" class="admin-sidebar flex flex-col">
+        <div class="p-10 border-b border-white/5">
+            <h2 class="text-2xl font-black text-indigo-500">MASTER PANEL</h2>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Management Suite V9</p>
         </div>
-        <div class="p-6 space-y-2">
-            <div class="p-4 hover:bg-slate-800 rounded-2xl cursor-pointer flex items-center gap-4 transition" onclick="showAdminView('dashboard')">
-                <i class="fas fa-chart-pie w-5"></i> Dashboard
-            </div>
-            <div class="p-4 hover:bg-slate-800 rounded-2xl cursor-pointer flex items-center gap-4 transition" onclick="showAdminView('orders')">
-                <i class="fas fa-tasks w-5"></i> จัดการออเดอร์
-            </div>
-            <div class="p-4 hover:bg-slate-800 rounded-2xl cursor-pointer flex items-center gap-4 transition" onclick="showAdminView('topups')">
-                <i class="fas fa-money-check-alt w-5"></i> อนุมัติเติมเงิน
-            </div>
-            <div class="p-4 hover:bg-slate-800 rounded-2xl cursor-pointer flex items-center gap-4 transition" onclick="showAdminView('users')">
-                <i class="fas fa-users w-5"></i> รายชื่อลูกค้า
-            </div>
-            <div class="p-4 hover:bg-slate-800 rounded-2xl cursor-pointer flex items-center gap-4 transition" onclick="showAdminView('settings')">
-                <i class="fas fa-sliders-h w-5"></i> ตั้งค่าระบบ
-            </div>
-            <div class="pt-10 border-t border-slate-800 mt-6">
-                <button onclick="handleLogout()" class="w-full bg-red-500/10 text-red-500 py-4 rounded-2xl font-bold flex items-center justify-center gap-2">
-                    <i class="fas fa-sign-out-alt"></i> ออกจากแผงควบคุม
-                </button>
-            </div>
+        <div class="flex-1 overflow-y-auto p-6 space-y-2">
+            <div class="adm-nav active" onclick="goAdmin('dash')"><i class="fas fa-analytics mr-3"></i> Dashboard</div>
+            <div class="adm-nav" onclick="goAdmin('orders')"><i class="fas fa-shield-halved mr-3"></i> จัดการออเดอร์</div>
+            <div class="adm-nav" onclick="goAdmin('topups')"><i class="fas fa-wallet mr-3"></i> คำขอเติมเงิน</div>
+            <div class="adm-nav" onclick="goAdmin('users')"><i class="fas fa-users-gear mr-3"></i> จัดการสมาชิก</div>
+            <div class="adm-nav" onclick="goAdmin('settings')"><i class="fas fa-cog mr-3"></i> ตั้งค่ามาสเตอร์</div>
+        </div>
+        <div class="p-8 border-t border-white/5">
+            <button onclick="handleLogout()" class="w-full py-4 bg-red-500/10 text-red-500 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-red-500 hover:text-white transition">
+                <i class="fas fa-power-off"></i> ปิดเซสชัน
+            </button>
         </div>
     </nav>
 
-    <!-- MAIN APP CONTENT -->
-    <main id="app-main">
+    <main class="max-w-6xl mx-auto pb-32">
 
-        <!-- =============================================
-             CUSTOMER VIEWS
-             ============================================= -->
-        <div id="customer-view-container" class="container-custom">
+        <div id="customer-container" class="px-5 pt-8">
             
-            <!-- VIEW: HOME -->
-            <section id="view-home" class="view-section active">
-                <div class="relative rounded-[2.5rem] overflow-hidden mb-6 h-48 shadow-2xl animate__animated animate__fadeIn">
-                    <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-blue-900/80 to-transparent p-8 flex flex-col justify-end">
-                        <h2 class="text-white text-2xl font-bold">RS RUPDAN V8</h2>
-                        <p class="text-blue-200 text-xs">บริการจ้างดันแรงค์ ความเร็วสูง ปลอดภัย 100%</p>
+            <section id="p-home" class="view-section active">
+                <div class="relative rounded-[3rem] overflow-hidden mb-8 h-56 shadow-2xl animate-float">
+                    <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent p-10 flex flex-col justify-end">
+                        <span class="bg-indigo-500 text-[10px] font-black px-3 py-1 rounded-full w-fit mb-3 uppercase tracking-tighter">New Update V9</span>
+                        <h2 class="text-3xl font-black text-white italic">PREMIUM RANKING SERVICE</h2>
+                        <p class="text-slate-400 text-sm mt-1">บริการดันแรงค์คุณภาพสูงสุด ด้วยระบบ AI ประมวลผลราคาตามจริง</p>
                     </div>
                 </div>
 
-                <div id="shop-status-banner" class="hidden mb-6 p-4 bg-red-100 text-red-600 rounded-2xl border border-red-200 font-bold flex items-center gap-3">
-                    <i class="fas fa-store-slash"></i> ขณะนี้ร้านปิดรับออเดอร์ชั่วคราว
-                </div>
-
-                <div class="grid grid-cols-2 gap-4 mb-8">
-                    <div onclick="switchPage('order')" class="glass-card p-6 flex flex-col items-center gap-3 active:scale-95 transition cursor-pointer">
-                        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-xl shadow-inner"><i class="fas fa-gamepad"></i></div>
-                        <span class="font-bold text-sm">เริ่มสั่งจ้าง</span>
-                    </div>
-                    <div onclick="switchPage('topup')" class="glass-card p-6 flex flex-col items-center gap-3 active:scale-95 transition cursor-pointer">
-                        <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-xl shadow-inner"><i class="fas fa-wallet"></i></div>
-                        <span class="font-bold text-sm">เติมเงิน</span>
+                <div id="shop-alert" class="hidden mb-6 glass-panel p-5 bg-red-500/10 border-red-500/20 flex items-center gap-4">
+                    <div class="w-12 h-12 bg-red-500 rounded-2xl flex items-center justify-center text-xl animate-pulse"><i class="fas fa-store-slash text-white"></i></div>
+                    <div>
+                        <h4 class="font-bold text-red-400">ปิดรับออเดอร์ชั่วคราว</h4>
+                        <p class="text-xs text-red-300/70">ขออภัยครับ ขณะนี้แอดมินกำลังเคลียร์คิวงานเก่าอยู่ครับ</p>
                     </div>
                 </div>
 
-                <div class="glass-card p-8 mb-6">
-                    <h3 class="font-bold mb-4 flex items-center gap-2 text-blue-600"><i class="fas fa-bullhorn"></i> ประกาศอัปเดตล่าสุด</h3>
-                    <div id="home-announcement" class="text-sm text-slate-500 leading-relaxed min-h-[50px]">
-                        กำลังโหลดประกาศ...
+                <div class="grid grid-cols-2 gap-5 mb-10">
+                    <div onclick="goPage('order')" class="glass-panel p-8 flex flex-col items-center gap-4 hover:bg-white/5 transition-all cursor-pointer group">
+                        <div class="w-16 h-16 bg-indigo-500/10 text-indigo-400 rounded-3xl flex items-center justify-center text-2xl group-hover:scale-110 transition"><i class="fas fa-gamepad"></i></div>
+                        <span class="font-bold text-sm tracking-wide">สั่งจ้างดันแรงค์</span>
+                    </div>
+                    <div onclick="goPage('topup')" class="glass-panel p-8 flex flex-col items-center gap-4 hover:bg-white/5 transition-all cursor-pointer group">
+                        <div class="w-16 h-16 bg-amber-500/10 text-amber-500 rounded-3xl flex items-center justify-center text-2xl group-hover:scale-110 transition"><i class="fas fa-wallet"></i></div>
+                        <span class="font-bold text-sm tracking-wide">เติมเครดิต</span>
                     </div>
                 </div>
 
-                <div class="glass-card p-8">
-                    <h3 class="font-bold mb-4 text-blue-600">ช่องทางการติดต่อ</h3>
-                    <div id="contact-links-area" class="grid grid-cols-1 gap-2">
-                        <!-- Links injected here -->
+                <div class="glass-panel p-10 mb-8 border-l-8 border-indigo-500">
+                    <div class="flex items-center gap-3 mb-6">
+                        <i class="fas fa-bullhorn text-indigo-400 text-xl"></i>
+                        <h3 class="text-lg font-black italic tracking-tighter">ANNOUNCEMENT</h3>
                     </div>
+                    <div id="text-announce" class="text-sm text-slate-400 leading-relaxed whitespace-pre-wrap">...</div>
+                </div>
+
+                <div class="glass-panel p-10">
+                    <h3 class="text-lg font-black mb-6 italic">CONTACT CHANNELS</h3>
+                    <div id="contact-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
                 </div>
             </section>
 
-            <!-- VIEW: ORDER -->
-            <section id="view-order" class="view-section">
-                <h2 class="text-2xl font-bold mb-6">สร้างรายการสั่งจ้าง</h2>
-                <div class="glass-card p-8 space-y-6">
-                    <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1.5 rounded-2xl">
-                        <button id="btn-mode-cs" onclick="setOrderMode('cs')" class="py-3 rounded-xl font-bold text-xs bg-white text-blue-600 shadow-sm transition-all">4V4 (CS)</button>
-                        <button id="btn-mode-br" onclick="setOrderMode('br')" class="py-3 rounded-xl font-bold text-xs text-slate-400 transition-all">แรงค์ใหญ่ (BR)</button>
+            <section id="p-order" class="view-section max-w-2xl mx-auto">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-3xl font-black italic">NEW ORDER</h2>
+                    <div class="px-4 py-1.5 bg-indigo-500/10 rounded-full border border-indigo-500/20 text-indigo-400 text-[10px] font-bold">V9 AUTO CALC</div>
+                </div>
+
+                <div class="glass-panel p-10 space-y-8">
+                    <div class="grid grid-cols-2 gap-3 p-2 bg-slate-900/50 rounded-3xl border border-white/5">
+                        <button id="mode-cs" onclick="selectMode('cs')" class="py-4 rounded-2xl font-black text-xs transition-all duration-500 bg-indigo-600 text-white shadow-xl">4V4 (CLASH SQUAD)</button>
+                        <button id="mode-br" onclick="selectMode('br')" class="py-4 rounded-2xl font-black text-xs transition-all duration-500 text-slate-500">BATTLE ROYALE</button>
                     </div>
 
-                    <div class="space-y-4">
-                        <div class="input-group">
-                            <select id="ord-rank" class="modern-input" onchange="calculateOrderPrice()">
-                                <option value="low">ต่ำกว่าแรงค์แดง</option>
-                                <option value="red">Diamond (แรงค์แดง)</option>
+                    <div class="space-y-6">
+                        <div class="relative group">
+                            <select id="input-rank" onchange="updateLivePrice()" class="glass-input w-full appearance-none">
+                                <option value="low">Bronze - Platinum (ต่ำกว่าแรงค์แดง)</option>
+                                <option value="red" selected>Diamond (แรงค์แดง)</option>
                                 <option value="master">Master (มาสเตอร์)</option>
                                 <option value="grand">Grandmaster (แกรนด์)</option>
                             </select>
-                            <label class="floating-label">เลือกระดับแรงค์ปัจจุบัน</label>
+                            <div class="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500"><i class="fas fa-chevron-down"></i></div>
+                            <label class="absolute -top-3 left-6 bg-slate-950 px-2 text-[10px] font-black text-indigo-400 uppercase tracking-widest">Ranking Tier</label>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="input-group">
-                                <input type="number" id="ord-start" class="modern-input" placeholder=" " oninput="calculateOrderPrice()">
-                                <label class="floating-label">ดาว/แต้มเริ่มต้น</label>
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="relative">
+                                <input type="number" id="input-cur" placeholder="0" oninput="updateLivePrice()" class="glass-input w-full">
+                                <label class="absolute -top-3 left-6 bg-slate-950 px-2 text-[10px] font-black text-slate-500 uppercase">Current Stars/Points</label>
                             </div>
-                            <div class="input-group">
-                                <input type="number" id="ord-target" class="modern-input" placeholder=" " oninput="calculateOrderPrice()">
-                                <label class="floating-label">เป้าหมาย</label>
+                            <div class="relative">
+                                <input type="number" id="input-tar" placeholder="50" oninput="updateLivePrice()" class="glass-input w-full">
+                                <label class="absolute -top-3 left-6 bg-slate-950 px-2 text-[10px] font-black text-indigo-400 uppercase">Target Goal</label>
                             </div>
                         </div>
 
-                        <div class="input-group">
-                            <input type="text" id="ord-game-id" class="modern-input" placeholder=" ">
-                            <label class="floating-label">UID ในเกม / ID ที่ให้ล็อคอิน</label>
+                        <div class="relative">
+                            <input type="text" id="input-gameid" placeholder="Ex: 123456789 หรือ ID:PASS" class="glass-input w-full">
+                            <label class="absolute -top-3 left-6 bg-slate-950 px-2 text-[10px] font-black text-slate-500 uppercase">Game Identification / Login</label>
                         </div>
                     </div>
 
-                    <div class="bg-slate-900 rounded-[2rem] p-8 text-center text-white relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-blue-500/20 blur-2xl rounded-full"></div>
-                        <p class="text-[10px] text-blue-400 font-bold uppercase tracking-widest mb-2">ยอดชำระทั้งหมด</p>
-                        <div class="flex items-center justify-center gap-2">
-                            <span class="text-4xl font-black" id="ord-total-price">0</span>
-                            <span class="text-xl font-bold text-blue-400">฿</span>
+                    <div class="relative p-10 bg-slate-950/80 rounded-[3rem] border-2 border-indigo-500/20 overflow-hidden group">
+                        <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,var(--primary-glow),transparent)] opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                        <div class="relative z-10 text-center">
+                            <p class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">Total Service Fee</p>
+                            <div class="flex items-center justify-center gap-3">
+                                <span id="text-price" class="text-6xl font-black text-white italic tracking-tighter">0</span>
+                                <span class="text-2xl font-bold text-indigo-500">฿</span>
+                            </div>
+                            <p class="text-[9px] text-slate-500 mt-4 italic">*ระบบจะคำนวณอัตโนมัติจากส่วนต่างเป้าหมายคูณด้วยเรทราคาของแรงค์นั้นๆ</p>
                         </div>
                     </div>
 
-                    <button onclick="submitOrder()" class="btn-gradient w-full py-5 text-lg shadow-xl">
-                        <i class="fas fa-check-circle"></i> ยืนยันการชำระเงิน
+                    <button onclick="submitJobRequest()" class="btn-premium w-full py-6 text-xl font-black italic tracking-widest shadow-2xl">
+                        CONFIRM & PAY NOW
                     </button>
                 </div>
             </section>
 
-            <!-- VIEW: TOPUP -->
-            <section id="view-topup" class="view-section">
-                <h2 class="text-2xl font-bold mb-6">เติมเงินเข้าระบบ</h2>
-                <div class="glass-card p-8 space-y-6">
-                    <div class="p-6 bg-orange-50 border-2 border-orange-100 rounded-3xl text-center">
-                        <p class="text-xs font-bold text-orange-400 uppercase mb-2">Truemoney Wallet</p>
-                        <h4 id="admin-wallet-num" class="text-2xl font-black text-orange-600 tracking-wider">000-000-0000</h4>
-                        <p id="admin-wallet-name" class="text-sm font-bold text-slate-500 mt-1">ชื่อบัญชี: ...</p>
+            <section id="p-topup" class="view-section max-w-xl mx-auto">
+                <h2 class="text-3xl font-black italic mb-8">CREDIT TOP-UP</h2>
+                <div class="glass-panel p-10 space-y-8">
+                    
+                    <div class="p-8 bg-indigo-500/5 border border-indigo-500/20 rounded-[2.5rem] relative overflow-hidden text-center">
+                        <div class="absolute -right-5 -bottom-5 text-8xl text-indigo-500/5 rotate-12"><i class="fas fa-building-columns"></i></div>
+                        <h4 class="text-[10px] font-black text-indigo-400 uppercase mb-4 tracking-widest">Bank Transfer / Others</h4>
+                        <p class="text-sm text-slate-400 mb-6">หากต้องการเติมผ่านบัญชีธนาคาร หรือช่องทางอื่นๆ กรุณาติดต่อแอดมินโดยตรง</p>
+                        <button onclick="openContactModal()" class="px-8 py-3 bg-white/5 border border-white/10 rounded-full text-xs font-bold hover:bg-white/10 transition">
+                            <i class="fas fa-headset mr-2"></i> ติดต่อเจ้าหน้าที่
+                        </button>
                     </div>
 
-                    <div class="space-y-4">
-                        <div class="input-group">
-                            <input type="number" id="topup-amount" class="modern-input" placeholder=" ">
-                            <label class="floating-label">จำนวนเงินที่โอน (บาท)</label>
+                    <div class="relative">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-1.5 h-6 bg-amber-500 rounded-full"></div>
+                            <h3 class="font-bold text-amber-500">TRUEMONEY GIFT LINK (ซองของขวัญ)</h3>
                         </div>
-                        <div class="input-group">
-                            <input type="text" id="topup-ref" class="modern-input" placeholder=" ">
-                            <label class="floating-label">เลขอ้างอิง / ลิงก์ซองของขวัญ</label>
+                        
+                        <div class="space-y-6">
+                            <div class="relative">
+                                <input type="text" id="topup-url" placeholder="https://gift.truemoney.com/..." class="glass-input w-full">
+                                <label class="absolute -top-3 left-6 bg-slate-950 px-2 text-[10px] font-black text-amber-500 uppercase">Gift URL Link</label>
+                            </div>
+                            <button onclick="submitGiftTopup()" class="w-full py-5 bg-amber-500 text-slate-950 font-black italic rounded-2xl shadow-xl shadow-amber-500/10 hover:scale-[1.02] active:scale-95 transition">
+                                SUBMIT GIFT LINK
+                            </button>
+                            <p class="text-[10px] text-slate-500 italic text-center uppercase tracking-widest font-bold">แอดมินจะตรวจสอบและเพิ่มยอดเงินภายใน 5-10 นาที</p>
                         </div>
                     </div>
 
-                    <div class="p-4 bg-slate-50 rounded-2xl text-[10px] text-slate-400 leading-relaxed italic">
-                        * โปรดตรวจสอบยอดเงินและเบอร์ที่โอนให้ถูกต้องก่อนกดยืนยัน แอดมินจะตรวจสอบภายใน 5-15 นาที
-                    </div>
-
-                    <button onclick="submitTopup()" class="btn-gradient w-full py-4 !bg-orange-500 shadow-orange-200">
-                        <i class="fas fa-paper-plane"></i> แจ้งฝากเงิน
-                    </button>
                 </div>
             </section>
 
-            <!-- VIEW: TRACKING (HISTORY) -->
-            <section id="view-tracking" class="view-section">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold">ติดตามสถานะ</h2>
-                    <button onclick="syncData()" class="text-blue-600 font-bold text-xs"><i class="fas fa-sync"></i> รีเฟรช</button>
+            <section id="p-tracking" class="view-section">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-3xl font-black italic">MY ORDERS</h2>
+                    <button onclick="manualSync()" class="w-11 h-11 bg-white/5 rounded-2xl flex items-center justify-center hover:bg-white/10 transition"><i class="fas fa-sync-alt"></i></button>
                 </div>
-                
-                <div id="tracking-list" class="space-y-4">
-                    <!-- Orders will be loaded here -->
-                    <div class="text-center py-20 text-slate-300">
-                        <i class="fas fa-box-open text-5xl mb-4"></i>
-                        <p>ยังไม่มีประวัติการสั่งจ้าง</p>
-                    </div>
-                </div>
+                <div id="tracking-list-ui" class="space-y-6"></div>
             </section>
 
-            <!-- VIEW: PROFILE -->
-            <section id="view-profile" class="view-section">
-                <h2 class="text-2xl font-bold mb-6">ข้อมูลส่วนตัว</h2>
+            <section id="p-profile" class="view-section max-w-xl mx-auto">
+                <h2 class="text-3xl font-black italic mb-8">MY ACCOUNT</h2>
                 
-                <div class="glass-card p-8 text-center mb-6 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-4">
-                        <button onclick="toggleEditProfile()" class="text-blue-600"><i class="fas fa-edit"></i></button>
-                    </div>
-                    <div id="u-profile-avatar" class="w-24 h-24 bg-blue-600 text-white rounded-[2rem] mx-auto flex items-center justify-center text-4xl font-bold shadow-2xl mb-4">
-                        U
-                    </div>
-                    <h3 id="u-profile-name" class="text-xl font-bold">-</h3>
-                    <p id="u-profile-email" class="text-xs text-slate-400 mb-6">-</p>
+                <div class="glass-panel p-10 text-center mb-8 relative overflow-hidden group">
+                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full"></div>
+                    
+                    <div id="prof-avatar-ui" class="w-28 h-28 bg-indigo-600 rounded-[2.5rem] mx-auto flex items-center justify-center text-5xl font-black text-white shadow-2xl mb-6 border-4 border-white/5 group-hover:rotate-6 transition-transform">U</div>
+                    <h3 id="prof-name-ui" class="text-2xl font-black italic">-</h3>
+                    <p id="prof-email-ui" class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-10">-</p>
                     
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-blue-50 p-5 rounded-3xl text-left border border-blue-100">
-                            <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">ยอดคงเหลือ</p>
-                            <p id="u-profile-balance" class="text-xl font-black text-blue-600">0.00 ฿</p>
+                        <div class="p-6 bg-slate-950 rounded-[2rem] border border-white/5 text-left">
+                            <p class="text-[9px] font-black text-indigo-400 uppercase mb-1">Total Credits</p>
+                            <p id="prof-bal-ui" class="text-2xl font-black text-white">0.00 ฿</p>
                         </div>
-                        <div class="bg-slate-50 p-5 rounded-3xl text-left border border-slate-100">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ออเดอร์ทั้งหมด</p>
-                            <p id="u-profile-count" class="text-xl font-black text-slate-700">0</p>
+                        <div class="p-6 bg-slate-950 rounded-[2rem] border border-white/5 text-left">
+                            <p class="text-[9px] font-black text-slate-500 uppercase mb-1">Rank Orders</p>
+                            <p id="prof-ord-ui" class="text-2xl font-black text-white">0</p>
                         </div>
                     </div>
                 </div>
 
-                <div id="edit-profile-box" class="hidden glass-card p-8 mb-6 animate__animated animate__fadeIn">
-                    <h4 class="font-bold mb-4 text-sm">แก้ไขข้อมูล</h4>
-                    <div class="space-y-4">
-                        <div class="input-group">
-                            <input type="text" id="edit-name" class="modern-input" placeholder=" ">
-                            <label class="floating-label">ชื่อที่แสดง</label>
+                <div class="space-y-4">
+                    <button onclick="handleLogout()" class="w-full bg-red-500/10 border border-red-500/20 p-6 rounded-[2rem] flex justify-between items-center group">
+                        <div class="flex items-center gap-4 text-red-500">
+                            <div class="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center group-hover:bg-red-500 group-hover:text-white transition-colors"><i class="fas fa-power-off"></i></div>
+                            <span class="font-black italic text-sm">TERMINATE SESSION</span>
                         </div>
-                        <div class="input-group">
-                            <input type="text" id="edit-fb" class="modern-input" placeholder=" ">
-                            <label class="floating-label">ลิงก์ Facebook</label>
-                        </div>
-                        <button onclick="saveProfile()" class="btn-gradient w-full py-3">บันทึกข้อมูล</button>
-                    </div>
-                </div>
-
-                <div class="space-y-3">
-                    <button onclick="handleLogout()" class="w-full glass-card p-5 flex justify-between items-center text-red-500 font-bold border-red-50 border-2">
-                        <span><i class="fas fa-power-off mr-3"></i> ออกจากระบบ</span>
-                        <i class="fas fa-chevron-right text-red-200"></i>
+                        <i class="fas fa-chevron-right text-red-500/30"></i>
                     </button>
                 </div>
             </section>
 
-            <!-- VIEW: AUTH (LOGIN / REGISTER) -->
-            <section id="view-auth" class="view-section">
-                <div id="auth-login-box" class="glass-card p-10 shadow-2xl animate__animated animate__zoomIn">
-                    <h2 class="text-3xl font-black text-center mb-8 text-slate-800">เข้าสู่ระบบ</h2>
-                    <div class="space-y-4">
-                        <div class="input-group">
-                            <input type="email" id="login-email" class="modern-input" placeholder=" ">
-                            <label class="floating-label">อีเมลผู้ใช้งาน</label>
+            <section id="p-auth" class="view-section">
+                <div id="box-login" class="glass-panel p-10 max-w-md mx-auto shadow-2xl">
+                    <h2 class="text-4xl font-black italic text-center mb-10 tracking-tighter">SIGN IN</h2>
+                    <div class="space-y-6">
+                        <div class="relative">
+                            <input type="email" id="log-email" placeholder=" " class="glass-input w-full">
+                            <label class="floating-label">Email Address</label>
                         </div>
-                        <div class="input-group">
-                            <input type="password" id="login-password" class="modern-input" placeholder=" ">
-                            <label class="floating-label">รหัสผ่าน</label>
+                        <div class="relative">
+                            <input type="password" id="log-pass" placeholder=" " class="glass-input w-full">
+                            <label class="floating-label">Password</label>
                         </div>
-                        <button onclick="handleLogin()" class="btn-gradient w-full py-5 shadow-blue-200">เข้าสู่ระบบ</button>
-                        <div class="text-center pt-4">
-                            <p class="text-sm text-slate-400">ยังไม่มีบัญชีสมาชิก? <span onclick="toggleAuthMode('reg')" class="text-blue-600 font-bold cursor-pointer underline">สมัครที่นี่</span></p>
+                        <button onclick="handleLogin()" class="btn-premium w-full py-5 text-sm font-black italic uppercase tracking-widest shadow-indigo-500/20 shadow-xl">
+                            AUTHENTICATE
+                        </button>
+                        <div class="text-center">
+                            <p class="text-xs text-slate-500 font-bold uppercase">No account? <span onclick="authBox('reg')" class="text-indigo-400 cursor-pointer underline">Create Mission</span></p>
                         </div>
                     </div>
                 </div>
 
-                <div id="auth-reg-box" class="hidden glass-card p-10 shadow-2xl animate__animated animate__zoomIn">
-                    <h2 class="text-3xl font-black text-center mb-8 text-slate-800">สมัครสมาชิก</h2>
-                    <div class="space-y-4">
-                        <div class="input-group">
-                            <input type="text" id="reg-name" class="modern-input" placeholder=" ">
-                            <label class="floating-label">ชื่อ-นามสกุล</label>
-                        </div>
-                        <div class="input-group">
-                            <input type="email" id="reg-email" class="modern-input" placeholder=" ">
-                            <label class="floating-label">อีเมล</label>
-                        </div>
-                        <div class="input-group">
-                            <input type="password" id="reg-password" class="modern-input" placeholder=" ">
-                            <label class="floating-label">ตั้งรหัสผ่าน (6 ตัวขึ้นไป)</label>
-                        </div>
-                        <div class="input-group">
-                            <input type="text" id="reg-fb" class="modern-input" placeholder=" ">
-                            <label class="floating-label">ลิงก์ Facebook (ถ้ามี)</label>
-                        </div>
-                        <button onclick="handleRegister()" class="btn-gradient w-full py-5 shadow-blue-200">ยืนยันสมัครสมาชิก</button>
-                        <div class="text-center pt-4">
-                            <p class="text-sm text-slate-400">มีบัญชีอยู่แล้ว? <span onclick="toggleAuthMode('login')" class="text-blue-600 font-bold cursor-pointer underline">เข้าสู่ระบบ</span></p>
-                        </div>
+                <div id="box-reg" class="hidden glass-panel p-10 max-w-md mx-auto shadow-2xl">
+                    <h2 class="text-4xl font-black italic text-center mb-10 tracking-tighter">NEW MISSION</h2>
+                    <div class="space-y-5">
+                        <div class="relative"><input type="text" id="reg-name" placeholder=" " class="glass-input w-full"><label class="floating-label">Real Name</label></div>
+                        <div class="relative"><input type="email" id="reg-email" placeholder=" " class="glass-input w-full"><label class="floating-label">Email Address</label></div>
+                        <div class="relative"><input type="password" id="reg-pass" placeholder=" " class="glass-input w-full"><label class="floating-label">Access Password (6+)</label></div>
+                        <div class="relative"><input type="text" id="reg-fb" placeholder=" " class="glass-input w-full"><label class="floating-label">Facebook Profile Link</label></div>
+                        <button onclick="handleRegister()" class="btn-premium w-full py-5 text-sm font-black italic uppercase tracking-widest">INITIALIZE ACCOUNT</button>
+                        <div class="text-center"><p class="text-xs text-slate-500 font-bold uppercase">Already signed? <span onclick="authBox('login')" class="text-indigo-400 cursor-pointer underline">Log In</span></p></div>
                     </div>
                 </div>
             </section>
 
         </div>
 
-        <!-- =============================================
-             ADMIN VIEWS (ONLY SHOWN TO ADADMIN@GMAIL.COM)
-             ============================================= -->
-        <div id="admin-view-container" class="hidden container-admin animate__animated animate__fadeIn">
+        <div id="admin-container" class="hidden px-8 pt-10">
             
-            <!-- ADMIN: DASHBOARD -->
-            <section id="adm-dashboard" class="admin-view hidden p-8">
+            <section id="adm-dash" class="admin-view active">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-                    <div class="card-stat">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">ออเดอร์ค้าง</p>
-                        <h2 id="stat-pending-orders" class="text-4xl font-black mt-2">0</h2>
+                    <div class="glass-panel p-8 border-b-4 border-indigo-500 shadow-xl group">
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Orders</p>
+                        <h2 id="adm-stat-pending" class="text-5xl font-black italic mt-2 group-hover:translate-x-2 transition-transform">0</h2>
                     </div>
-                    <div class="card-stat border-green-500">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">สำเร็จแล้ว</p>
-                        <h2 id="stat-completed-orders" class="text-4xl font-black mt-2 text-green-600">0</h2>
+                    <div class="glass-panel p-8 border-b-4 border-green-500 shadow-xl group">
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Completed Jobs</p>
+                        <h2 id="adm-stat-done" class="text-5xl font-black italic mt-2 text-green-500 group-hover:translate-x-2 transition-transform">0</h2>
                     </div>
-                    <div class="card-stat border-orange-500">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">เติมเงินรออนุมัติ</p>
-                        <h2 id="stat-pending-topups" class="text-4xl font-black mt-2 text-orange-600">0</h2>
+                    <div class="glass-panel p-8 border-b-4 border-amber-500 shadow-xl group">
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Topups Pending</p>
+                        <h2 id="adm-stat-money" class="text-5xl font-black italic mt-2 text-amber-500 group-hover:translate-x-2 transition-transform">0</h2>
                     </div>
-                    <div class="card-stat border-slate-900">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">ลูกค้าทั้งหมด</p>
-                        <h2 id="stat-total-users" class="text-4xl font-black mt-2 text-slate-800">0</h2>
+                    <div class="glass-panel p-8 border-b-4 border-white shadow-xl group">
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Total Agents</p>
+                        <h2 id="adm-stat-users" class="text-5xl font-black italic mt-2 group-hover:translate-x-2 transition-transform">0</h2>
                     </div>
                 </div>
                 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="glass-card p-8">
-                        <h3 class="font-bold mb-6 flex justify-between">
-                            ออเดอร์ล่าสุด
-                            <button onclick="showAdminView('orders')" class="text-xs text-blue-600">ดูทั้งหมด</button>
-                        </h3>
-                        <div id="adm-recent-orders" class="space-y-4"></div>
+                    <div class="glass-panel p-10 overflow-hidden">
+                        <h3 class="font-black italic mb-8 border-b border-white/5 pb-4">RECENT DEPLOYMENTS</h3>
+                        <div id="adm-recent-list" class="space-y-4"></div>
                     </div>
-                    <div class="glass-card p-8">
-                        <h3 class="font-bold mb-6 flex justify-between">
-                            รายการเติมเงินล่าสุด
-                            <button onclick="showAdminView('topups')" class="text-xs text-blue-600">ดูทั้งหมด</button>
-                        </h3>
+                    <div class="glass-panel p-10 overflow-hidden">
+                        <h3 class="font-black italic mb-8 border-b border-white/5 pb-4">CRITICAL TOPUPS</h3>
                         <div id="adm-recent-topups" class="space-y-4"></div>
                     </div>
                 </div>
             </section>
 
-            <!-- ADMIN: ORDERS MANAGEMENT -->
-            <section id="adm-orders" class="admin-view hidden p-8">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                    <h2 class="text-2xl font-bold">จัดการรายการสั่งจ้าง</h2>
-                    <div class="w-full md:w-auto flex gap-2">
-                        <input type="text" id="adm-order-search" placeholder="ค้นหาตามชื่อ/UID..." class="modern-input !py-2 !px-4 !rounded-xl text-sm" oninput="filterAdminOrders()">
-                        <button onclick="syncData()" class="bg-blue-600 text-white px-4 rounded-xl text-xs"><i class="fas fa-sync"></i></button>
+            <section id="adm-orders" class="admin-view hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+                    <h2 class="text-4xl font-black italic tracking-tighter">ORDER MANAGEMENT</h2>
+                    <div class="flex gap-4 w-full md:w-auto">
+                        <div class="relative flex-1">
+                            <input type="text" id="adm-search-order" placeholder="Search by ID or Agent Name..." class="glass-input !py-3 !text-sm w-full" oninput="filterAdminOrders()">
+                            <i class="fas fa-search absolute right-4 top-1/2 -translate-y-1/2 text-slate-600"></i>
+                        </div>
                     </div>
                 </div>
-                <div id="adm-orders-list" class="space-y-6">
-                    <!-- Orders for admin -->
-                </div>
+                <div id="adm-orders-ui" class="space-y-6"></div>
             </section>
 
-            <!-- ADMIN: TOPUPS -->
-            <section id="adm-topups" class="admin-view hidden p-8">
-                <h2 class="text-2xl font-bold mb-8">รายการเติมเงินที่รอการตรวจสอบ</h2>
-                <div id="adm-topups-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Topups list -->
-                </div>
+            <section id="adm-topups" class="admin-view hidden">
+                <h2 class="text-4xl font-black italic mb-10">TOPUP APPROVALS</h2>
+                <div id="adm-topups-ui" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
             </section>
 
-            <!-- ADMIN: USERS -->
-            <section id="adm-users" class="admin-view hidden p-8">
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-2xl font-bold">ข้อมูลลูกค้า</h2>
-                    <input type="text" id="adm-user-search" placeholder="ค้นหาชื่อ/อีเมล..." class="modern-input !py-2 !px-4 !w-64" oninput="filterAdminUsers()">
+            <section id="adm-users" class="admin-view hidden">
+                <div class="flex justify-between items-center mb-10">
+                    <h2 class="text-4xl font-black italic">AGENT DIRECTORY</h2>
+                    <input type="text" id="adm-search-user" placeholder="Filter agents..." class="glass-input !py-3 !w-64" oninput="filterAdminUsers()">
                 </div>
-                <div class="glass-card overflow-hidden">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-50 border-b">
+                <div class="glass-panel overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-white/5 border-b border-white/10">
                             <tr>
-                                <th class="p-4">ลูกค้า</th>
-                                <th class="p-4">ยอดเงิน</th>
-                                <th class="p-4">จัดการ</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-widest text-slate-500">Agent Details</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-widest text-slate-500">Credit Balance</th>
+                                <th class="p-6 text-[10px] font-black uppercase tracking-widest text-slate-500">Operations</th>
                             </tr>
                         </thead>
-                        <tbody id="adm-users-table">
-                            <!-- User rows -->
-                        </tbody>
+                        <tbody id="adm-users-table-ui"></tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- ADMIN: SETTINGS -->
-            <section id="adm-settings" class="admin-view hidden p-8">
-                <h2 class="text-2xl font-bold mb-8">ตั้งค่าระบบ (Backend)</h2>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <section id="adm-settings" class="admin-view hidden">
+                <h2 class="text-4xl font-black italic mb-10">MASTER CONFIGURATION</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
                     
-                    <div class="glass-card p-8 space-y-6">
-                        <h3 class="font-bold border-b pb-2"><i class="fas fa-store"></i> ข้อมูลหน้าร้าน & วอลเล็ต</h3>
-                        <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
-                            <span>สถานะร้าน: <b id="shop-status-text" class="text-green-600">เปิดปกติ</b></span>
-                            <button id="shop-toggle-btn" onclick="toggleShopStatus()" class="px-4 py-2 bg-red-500 text-white rounded-xl text-xs font-bold">สั่งปิดร้าน</button>
+                    <div class="glass-panel p-10 space-y-8">
+                        <div class="flex items-center justify-between p-6 bg-white/5 rounded-[2rem] border border-white/10">
+                            <div>
+                                <h4 class="font-black italic">SHOP DEPLOYMENT</h4>
+                                <p class="text-[10px] text-slate-500 uppercase font-bold">Overall Store Visibility</p>
+                            </div>
+                            <button id="shop-toggle" onclick="toggleShopDeployment()" class="px-6 py-2 bg-indigo-600 text-[10px] font-black italic rounded-full shadow-lg transition">ACTIVE</button>
                         </div>
-                        <div class="space-y-4">
-                            <div class="input-group">
-                                <input type="text" id="set-wallet-num" class="modern-input" placeholder=" ">
-                                <label class="floating-label">เบอร์วอลเล็ตแอดมิน</label>
+                        <div class="space-y-6">
+                            <div class="relative">
+                                <textarea id="set-ann" class="glass-input h-32 w-full" placeholder=" "></textarea>
+                                <label class="floating-label">Primary Announcement (Main Page)</label>
                             </div>
-                            <div class="input-group">
-                                <input type="text" id="set-wallet-name" class="modern-input" placeholder=" ">
-                                <label class="floating-label">ชื่อบัญชีแอดมิน</label>
+                            <div class="relative">
+                                <input type="text" id="set-wf" class="glass-input w-full" placeholder=" ">
+                                <label class="floating-label">Workflow Steps (Comma separated)</label>
+                                <p class="text-[9px] text-slate-600 mt-2 italic">Ex: Queueing, Gaming, Half-way, Completed</p>
                             </div>
-                            <div class="input-group">
-                                <textarea id="set-announce" class="modern-input h-32" placeholder=" "></textarea>
-                                <label class="floating-label">ประกาศหน้าร้าน (HTML รองรับ)</label>
-                            </div>
-                            <button onclick="saveGeneralSettings()" class="btn-gradient w-full py-4">บันทึกข้อมูลทั่วไป</button>
+                            <button onclick="saveMasterCore()" class="btn-premium w-full py-4 text-xs font-black italic tracking-widest">SAVE MASTER CORE</button>
                         </div>
                     </div>
 
-                    <div class="glass-card p-8 space-y-6">
-                        <h3 class="font-bold border-b pb-2"><i class="fas fa-tags"></i> เรทราคา & ลำดับงาน</h3>
+                    <div class="glass-panel p-10 space-y-8">
+                        <h4 class="font-black italic border-b border-white/5 pb-4">SERVICE RATES & LINKS</h4>
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="input-group"><input type="number" id="rate-cs-low" class="modern-input" placeholder=" "><label class="floating-label">4V4 ทั่วไป/ดาว</label></div>
-                            <div class="input-group"><input type="number" id="rate-cs-red" class="modern-input" placeholder=" "><label class="floating-label">4V4 แดง/ดาว</label></div>
-                            <div class="input-group"><input type="number" id="rate-cs-master" class="modern-input" placeholder=" "><label class="floating-label">4V4 มาสเตอร์/ดาว</label></div>
-                            <div class="input-group"><input type="number" id="rate-cs-grand" class="modern-input" placeholder=" "><label class="floating-label">4V4 แกรนด์/ดาว</label></div>
-                            <div class="input-group"><input type="number" id="rate-br-low" class="modern-input" placeholder=" "><label class="floating-label">BR ต่ำกว่าแดง/แต้ม</label></div>
-                            <div class="input-group"><input type="number" id="rate-br-high" class="modern-input" placeholder=" "><label class="floating-label">BR แดงขึ้นไป/แต้ม</label></div>
+                            <div class="relative"><input type="number" id="s-cs-low" class="glass-input w-full" placeholder=" "><label class="floating-label">4V4 Normal/Star</label></div>
+                            <div class="relative"><input type="number" id="s-cs-red" class="glass-input w-full" placeholder=" "><label class="floating-label">4V4 Diamond/Star</label></div>
+                            <div class="relative"><input type="number" id="s-cs-master" class="glass-input w-full" placeholder=" "><label class="floating-label">4V4 Master/Star</label></div>
+                            <div class="relative"><input type="number" id="s-cs-grand" class="glass-input w-full" placeholder=" "><label class="floating-label">4V4 Grand/Star</label></div>
+                            <div class="relative"><input type="number" id="s-br-low" class="glass-input w-full" placeholder=" "><label class="floating-label">BR Normal/Point</label></div>
+                            <div class="relative"><input type="number" id="s-br-high" class="glass-input w-full" placeholder=" "><label class="floating-label">BR High/Point</label></div>
                         </div>
-                        <div class="input-group">
-                            <input type="text" id="set-workflows" class="modern-input" placeholder=" ">
-                            <label class="floating-label">ขั้นตอนการดัน (คั่นด้วยคอมม่า ,)</label>
-                            <p class="text-[9px] text-slate-400 mt-2 italic">ตัวอย่าง: รับงาน, เริ่มเล่น, ดันไปครึ่งทาง, งานเสร็จสิ้น</p>
+                        
+                        <div id="contact-manager-ui" class="space-y-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <h5 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Contact Nodes</h5>
+                                <button onclick="addContactNode()" class="text-[10px] bg-white/5 px-3 py-1 rounded-lg hover:bg-indigo-500 transition">+ Add Node</button>
+                            </div>
+                            <div id="contact-nodes-list" class="space-y-3"></div>
                         </div>
-                        <button onclick="saveRates()" class="btn-gradient w-full py-4 !bg-slate-900">บันทึกเรทและขั้นตอน</button>
+
+                        <button onclick="saveServiceAssets()" class="btn-premium w-full py-4 text-xs font-black italic tracking-widest shadow-indigo-500/20">COMMIT ALL ASSETS</button>
                     </div>
 
                 </div>
@@ -711,36 +617,35 @@
         </div>
     </main>
 
-    <!-- CUSTOMER BOTTOM NAV BAR -->
-    <nav id="customer-nav" class="bottom-nav">
-        <div onclick="switchPage('home')" id="nav-home" class="nav-item active">
-            <i class="fas fa-house-chimney"></i>
-            <span>หน้าหลัก</span>
+    <nav id="customer-nav" class="tab-bar animate__animated animate__slideInUp">
+        <div onclick="goPage('home')" id="tab-home" class="tab-item active">
+            <i class="fas fa-rocket"></i>
+            <span>Main</span>
         </div>
-        <div onclick="switchPage('order')" id="nav-order" class="nav-item">
-            <i class="fas fa-plus-circle"></i>
-            <span>สั่งงาน</span>
+        <div onclick="goPage('order')" id="tab-order" class="tab-item">
+            <i class="fas fa-bullseye"></i>
+            <span>Deploy</span>
         </div>
-        <div onclick="switchPage('tracking')" id="nav-tracking" class="nav-item">
-            <i class="fas fa-layer-group"></i>
-            <span>สถานะ</span>
+        <div onclick="goPage('tracking')" id="tab-tracking" class="tab-item">
+            <i class="fas fa-radar"></i>
+            <span>Radar</span>
         </div>
-        <div onclick="switchPage('profile')" id="nav-profile" class="nav-item">
-            <i class="fas fa-user-circle"></i>
-            <span>โปรไฟล์</span>
+        <div onclick="goPage('profile')" id="tab-profile" class="tab-item">
+            <i class="fas fa-id-card-clip"></i>
+            <span>Agent</span>
         </div>
     </nav>
 
-    <!-- Firebase SDK -->
+    <div class="h-24"></div>
+
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-    <!-- MAIN APP ENGINE (V8) -->
     <script>
-        // =============================================
-        // 1. INITIALIZATION & CONFIG
-        // =============================================
+        // ============================================================
+        // 1. SYSTEM INITIALIZATION
+        // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyDc50wlOejDQi3PTySiQss3bLuVz_-tvB4",
             authDomain: "walletrs-d6104.firebaseapp.com",
@@ -752,349 +657,333 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
-        // Global State
+        // Local State
         let currentUser = null;
         let isAdmin = false;
-        let systemSettings = {
+        let sysConfig = {
             isClosed: false,
-            announce: "ยินดีต้อนรับสู่ RS RUPDAN V8",
-            walletNum: "000-000-0000",
-            walletName: "ยังไม่ได้ระบุ",
-            rates: { cs_low: 5, cs_red: 10, cs_master: 15, cs_grand: 20, br_low: 1, br_high: 2 },
-            workflows: ["รอรับงาน", "กำลังดำเนินการ", "เสร็จสิ้น"],
+            announce: "RS RUPDAN V9 ULTIMATE DEPLOYED.",
+            rates: { cs_low: 5, cs_red: 10, cs_master: 15, cs_grand: 50, br_low: 1, br_high: 2 },
+            workflows: ["Waiting", "Processing", "Completed"],
             links: []
         };
-        let currentOrderMode = 'cs';
-        let allOrders = [];
-        let allUsers = [];
-        let allTopups = [];
+        let currentMode = 'cs';
+        let storeOrders = [];
+        let storeUsers = [];
+        let storeTopups = [];
 
-        // =============================================
-        // 2. CORE SYSTEM FUNCTIONS (ROUTING & AUTH)
-        // =============================================
+        // ============================================================
+        // 2. AUTHENTICATION & CORE FLOW
+        // ============================================================
         
-        // Page Switcher
-        function switchPage(page) {
-            if (isAdmin) {
-                Swal.fire('แอดมินเข้าใช้งาน', 'กรุณาออกจากหน้าแอดมินก่อนเข้าหน้าลูกค้า', 'info');
-                return;
-            }
-            
-            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-            document.getElementById('view-' + page).classList.add('active');
-            
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('nav-' + page).classList.add('active');
-            window.scrollTo(0, 0);
-        }
-
-        // Admin Page Switcher
-        function showAdminView(view) {
-            document.querySelectorAll('.admin-view').forEach(v => v.classList.add('hidden'));
-            document.getElementById('adm-' + view).classList.remove('hidden');
-            if(window.innerWidth < 1024) toggleAdminSidebar();
-            
-            // Auto Refresh specific data
-            if(view === 'orders') renderAdminOrders();
-            if(view === 'topups') renderAdminTopups();
-            if(view === 'users') renderAdminUsers();
-            if(view === 'settings') updateSettingsInputs();
-        }
-
-        function toggleAdminSidebar() {
-            document.getElementById('admin-sidebar').classList.toggle('active');
-        }
-
-        function toggleAuthMode(mode) {
-            document.getElementById('auth-login-box').classList.toggle('hidden', mode === 'reg');
-            document.getElementById('auth-reg-box').classList.toggle('hidden', mode === 'login');
-        }
-
-        // Auth Listener
         auth.onAuthStateChanged(user => {
             if (user) {
                 if (user.email === 'adadmin@gmail.com') {
-                    enableAdminMode();
+                    activateAdminKernel();
                 } else {
-                    loadUserData(user.uid);
+                    initializeUserModule(user.uid);
                 }
             } else {
-                handleUnauthenticated();
+                handleUnauthorized();
             }
+            setTimeout(() => document.getElementById('loading-overlay').classList.add('opacity-0', 'pointer-events-none'), 800);
         });
 
-        function handleUnauthenticated() {
+        function handleUnauthorized() {
             currentUser = null;
             isAdmin = false;
             document.body.classList.remove('admin-active');
-            document.getElementById('header-user-status').classList.add('hidden');
-            document.getElementById('admin-toggle-btn').classList.add('hidden');
+            document.getElementById('user-status-widget').classList.add('hidden');
+            document.getElementById('btn-admin-panel').classList.add('hidden');
             document.getElementById('customer-nav').classList.remove('hidden');
-            document.getElementById('admin-view-container').classList.add('hidden');
-            document.getElementById('customer-view-container').classList.remove('hidden');
-            switchPage('auth');
+            document.getElementById('admin-container').classList.add('hidden');
+            document.getElementById('customer-container').classList.remove('hidden');
+            goPage('auth');
         }
 
-        function enableAdminMode() {
-            isAdmin = true;
-            document.body.classList.add('admin-active');
-            document.getElementById('admin-toggle-btn').classList.remove('hidden');
-            document.getElementById('customer-nav').classList.add('hidden');
-            document.getElementById('customer-view-container').classList.add('hidden');
-            document.getElementById('admin-view-container').classList.remove('hidden');
-            showAdminView('dashboard');
-            syncData(); // Get all data
-        }
-
-        async function loadUserData(uid) {
+        async function initializeUserModule(uid) {
             db.ref('users/' + uid).on('value', snap => {
                 currentUser = snap.val();
                 if (currentUser) {
-                    updateCustomerUI();
-                    switchPage('home');
-                    syncData(); // Load my orders
-                } else {
-                    // Handle missing database record
-                    db.ref('users/' + uid).set({
-                        uid: uid, name: "User-" + uid.slice(0,4),
-                        email: auth.currentUser.email, balance: 0,
-                        fb: "", registeredAt: Date.now()
-                    });
+                    syncUserUI();
+                    if (document.getElementById('p-auth').classList.contains('active')) goPage('home');
+                    manualSync();
                 }
             });
         }
 
-        function updateCustomerUI() {
-            document.getElementById('header-user-status').classList.remove('hidden');
-            document.getElementById('header-balance').innerText = currentUser.balance.toLocaleString('th-TH', { minimumFractionDigits: 2 }) + ' ฿';
-            document.getElementById('header-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
-            
-            document.getElementById('u-profile-name').innerText = currentUser.name;
-            document.getElementById('u-profile-email').innerText = currentUser.email;
-            document.getElementById('u-profile-balance').innerText = currentUser.balance.toLocaleString() + ' ฿';
-            
-            // Sync Input fields if box is visible
-            document.getElementById('edit-name').value = currentUser.name;
-            document.getElementById('edit-fb').value = currentUser.fb || '';
+        function activateAdminKernel() {
+            isAdmin = true;
+            document.body.classList.add('admin-active');
+            document.getElementById('btn-admin-panel').classList.remove('hidden');
+            document.getElementById('customer-nav').classList.add('hidden');
+            document.getElementById('customer-container').classList.add('hidden');
+            document.getElementById('admin-container').classList.remove('hidden');
+            goAdmin('dash');
+            manualSync(); // Trigger full data fetch
         }
 
-        // =============================================
-        // 3. DATABASE SYNC & RENDER (NO INDEX REQUIRED)
-        // =============================================
-        
-        function syncData() {
-            const btn = document.querySelector('.refresh-btn i');
-            btn.classList.add('fa-spin');
+        // ============================================================
+        // 3. NAVIGATION ENGINE
+        // ============================================================
+
+        function goPage(view) {
+            if (isAdmin) return;
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.getElementById('p-' + view).classList.add('active');
             
-            // Global Settings Sync
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            if(document.getElementById('tab-' + view)) document.getElementById('tab-' + view).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function goAdmin(view) {
+            document.querySelectorAll('.admin-view').forEach(v => v.classList.add('hidden'));
+            document.getElementById('adm-' + view).classList.remove('hidden');
+            
+            document.querySelectorAll('.adm-nav').forEach(n => n.classList.remove('active', 'bg-indigo-600', 'text-white'));
+            const activeNav = Array.from(document.querySelectorAll('.adm-nav')).find(el => el.textContent.toLowerCase().includes(view));
+            if(activeNav) activeNav.classList.add('active', 'bg-indigo-600', 'text-white');
+            
+            if(window.innerWidth < 1024) toggleSidebar(false);
+            
+            // View Specific Refresh
+            if(view === 'orders') renderAdminOrders();
+            if(view === 'topups') renderAdminTopups();
+            if(view === 'users') renderAdminUsers();
+            if(view === 'settings') syncAdminSettingsInputs();
+        }
+
+        function toggleSidebar(state) {
+            const side = document.getElementById('admin-sidebar');
+            if(state === undefined) side.classList.toggle('active');
+            else if(state) side.classList.add('active');
+            else side.classList.remove('active');
+        }
+
+        function authBox(mode) {
+            document.getElementById('box-login').classList.toggle('hidden', mode === 'reg');
+            document.getElementById('box-reg').classList.toggle('hidden', mode === 'login');
+        }
+
+        // ============================================================
+        // 4. DATA SYNCHRONIZATION (MASTER)
+        // ============================================================
+
+        function manualSync() {
+            const spin = document.querySelector('.fa-sync-alt');
+            if(spin) spin.classList.add('fa-spin');
+
+            // 1. Core Settings
             db.ref('settings').once('value', snap => {
                 if(snap.exists()) {
-                    systemSettings = {...systemSettings, ...snap.val()};
-                    renderGlobalUI();
+                    sysConfig = {...sysConfig, ...snap.val()};
+                    applyGlobalConfig();
                 }
             });
 
             if (isAdmin) {
-                // Admin: Sync All
+                // 2. Admin Global Fetch
                 db.ref('orders').once('value', snap => {
-                    allOrders = [];
-                    snap.forEach(child => { allOrders.push(child.val()); });
-                    allOrders.sort((a,b) => b.timestamp - a.timestamp);
+                    storeOrders = [];
+                    snap.forEach(c => storeOrders.push(c.val()));
+                    storeOrders.sort((a,b) => b.timestamp - a.timestamp);
                     renderAdminOrders();
-                    updateAdminStats();
-                });
-                db.ref('users').once('value', snap => {
-                    allUsers = [];
-                    snap.forEach(child => { allUsers.push(child.val()); });
-                    renderAdminUsers();
-                    updateAdminStats();
+                    updateAdminDashStats();
                 });
                 db.ref('topups').once('value', snap => {
-                    allTopups = [];
-                    snap.forEach(child => { allTopups.push(child.val()); });
+                    storeTopups = [];
+                    snap.forEach(c => storeTopups.push(c.val()));
                     renderAdminTopups();
-                    updateAdminStats();
+                    updateAdminDashStats();
+                });
+                db.ref('users').once('value', snap => {
+                    storeUsers = [];
+                    snap.forEach(c => storeUsers.push(c.val()));
+                    renderAdminUsers();
+                    updateAdminDashStats();
                 });
             } else if (currentUser) {
-                // Customer: Sync Only My Orders
+                // 3. User Specific Fetch
                 db.ref('orders').once('value', snap => {
-                    const myOrders = [];
-                    snap.forEach(child => {
-                        if(child.val().uid === currentUser.uid) myOrders.push(child.val());
-                    });
-                    myOrders.sort((a,b) => b.timestamp - a.timestamp);
-                    renderMyOrders(myOrders);
-                    document.getElementById('u-profile-count').innerText = myOrders.length;
+                    const myItems = [];
+                    snap.forEach(c => { if(c.val().uid === currentUser.uid) myItems.push(c.val()); });
+                    myItems.sort((a,b) => b.timestamp - a.timestamp);
+                    renderMyRadarUI(myItems);
+                    document.getElementById('prof-ord-ui').innerText = myItems.length;
                 });
             }
 
-            setTimeout(() => btn.classList.remove('fa-spin'), 1000);
+            setTimeout(() => { if(spin) spin.classList.remove('fa-spin'); }, 1000);
         }
 
-        function renderGlobalUI() {
-            // Announcement
-            document.getElementById('home-announcement').innerHTML = systemSettings.announce;
+        function applyGlobalConfig() {
+            // Announcement Area
+            document.getElementById('text-announce').innerHTML = sysConfig.announce;
             
-            // Shop Status
-            const banner = document.getElementById('shop-status-banner');
-            systemSettings.isClosed ? banner.classList.remove('hidden') : banner.classList.add('hidden');
-            
-            // Topup Info
-            document.getElementById('admin-wallet-num').innerText = systemSettings.walletNum;
-            document.getElementById('admin-wallet-name').innerText = "ชื่อบัญชี: " + systemSettings.walletName;
-            
-            // Update Settings inputs in admin view if open
-            updateSettingsInputs();
+            // Shop Deployment Status
+            const alert = document.getElementById('shop-alert');
+            sysConfig.isClosed ? alert.classList.remove('hidden') : alert.classList.add('hidden');
+
+            // External Links UI
+            const container = document.getElementById('contact-list');
+            container.innerHTML = (sysConfig.links || []).map(l => `
+                <a href="${l.url}" target="_blank" class="p-5 glass-panel bg-white/5 border-white/10 flex items-center gap-4 hover:bg-white/10 transition group">
+                    <div class="w-12 h-12 bg-indigo-500 rounded-2xl flex items-center justify-center text-white text-xl group-hover:rotate-12 transition"><i class="${l.icon}"></i></div>
+                    <div>
+                        <p class="text-sm font-black italic">${l.name}</p>
+                        <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Connect Now</p>
+                    </div>
+                </a>
+            `).join('');
+
+            // Settings Fields (Admin)
+            if(isAdmin) syncAdminSettingsInputs();
         }
 
-        // =============================================
-        // 4. CUSTOMER LOGIC (ORDER, TOPUP, PROFILE)
-        // =============================================
+        // ============================================================
+        // 5. CUSTOMER INTERFACE MODULES
+        // ============================================================
 
-        function setOrderMode(mode) {
-            currentOrderMode = mode;
-            document.getElementById('btn-mode-cs').className = mode === 'cs' ? 'py-3 rounded-xl font-bold text-xs bg-white text-blue-600 shadow-sm transition-all' : 'py-3 rounded-xl font-bold text-xs text-slate-400 transition-all';
-            document.getElementById('btn-mode-br').className = mode === 'br' ? 'py-3 rounded-xl font-bold text-xs bg-white text-blue-600 shadow-sm transition-all' : 'py-3 rounded-xl font-bold text-xs text-slate-400 transition-all';
-            calculateOrderPrice();
+        function syncUserUI() {
+            document.getElementById('user-status-widget').classList.remove('hidden');
+            const formattedBal = currentUser.balance.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+            document.getElementById('header-bal').innerText = formattedBal + ' ฿';
+            document.getElementById('header-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
+            
+            // Profile View
+            document.getElementById('prof-avatar-ui').innerText = currentUser.name.charAt(0).toUpperCase();
+            document.getElementById('prof-name-ui').innerText = currentUser.name;
+            document.getElementById('prof-email-ui').innerText = currentUser.email;
+            document.getElementById('prof-bal-ui').innerText = formattedBal + ' ฿';
         }
 
-        function calculateOrderPrice() {
-            const rank = document.getElementById('ord-rank').value;
-            const start = parseInt(document.getElementById('ord-start').value) || 0;
-            const target = parseInt(document.getElementById('ord-target').value) || 0;
-            const diff = target - start;
+        function selectMode(m) {
+            currentMode = m;
+            document.getElementById('mode-cs').className = m === 'cs' ? 'py-4 rounded-2xl font-black text-xs transition-all duration-500 bg-indigo-600 text-white shadow-xl' : 'py-4 rounded-2xl font-black text-xs transition-all duration-500 text-slate-500';
+            document.getElementById('mode-br').className = m === 'br' ? 'py-4 rounded-2xl font-black text-xs transition-all duration-500 bg-indigo-600 text-white shadow-xl' : 'py-4 rounded-2xl font-black text-xs transition-all duration-500 text-slate-500';
+            updateLivePrice();
+        }
+
+        function updateLivePrice() {
+            const tier = document.getElementById('input-rank').value;
+            const cur = parseInt(document.getElementById('input-cur').value) || 0;
+            const tar = parseInt(document.getElementById('input-tar').value) || 0;
+            const gap = tar - cur;
             
             let rate = 0;
-            if (currentOrderMode === 'cs') {
-                rate = systemSettings.rates['cs_' + rank] || 0;
+            if (currentMode === 'cs') {
+                rate = sysConfig.rates['cs_' + tier] || 0;
             } else {
-                rate = (rank === 'master' || rank === 'grand') ? systemSettings.rates.br_high : systemSettings.rates.br_low;
+                rate = (tier === 'master' || tier === 'grand') ? sysConfig.rates.br_high : sysConfig.rates.br_low;
             }
             
-            const total = diff > 0 ? diff * rate : 0;
-            document.getElementById('ord-total-price').innerText = total.toLocaleString();
+            const total = gap > 0 ? gap * rate : 0;
+            document.getElementById('text-price').innerText = total.toLocaleString();
             return total;
         }
 
-        async function submitOrder() {
-            if (systemSettings.isClosed) return Swal.fire('ร้านปิด', 'ขออภัยครับ ร้านปิดรับออเดอร์ชั่วคราว', 'error');
-            if (!currentUser) return switchPage('auth');
+        async function submitJobRequest() {
+            if (sysConfig.isClosed) return Swal.fire('Mission Denied', 'เซิร์ฟเวอร์งดรับคำสั่งจ้างชั่วคราว', 'error');
+            if (!currentUser) return goPage('auth');
             
-            const price = calculateOrderPrice();
-            const gameID = document.getElementById('ord-game-id').value;
+            const fee = updateLivePrice();
+            const gID = document.getElementById('input-gameid').value;
             
-            if (price <= 0) return Swal.fire('ผิดพลาด', 'กรุณาระบุจำนวนดาว/แต้มเป้าหมายให้ถูกต้อง', 'warning');
-            if (!gameID) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอก UID หรือ ID เกมของคุณ', 'warning');
-            if (currentUser.balance < price) return Swal.fire('เงินไม่พอ', 'ยอดเงินของคุณไม่พอสำหรับการสั่งซื้อนี้ กรุณาเติมเงินก่อนครับ', 'error');
+            if (fee <= 0) return Swal.fire('Error', 'กรุณาระบุเป้าหมายให้มากกว่าปัจจุบัน', 'warning');
+            if (!gID) return Swal.fire('Incomplete', 'กรุณาระบุ UID หรือข้อมูลล็อกอินเกม', 'warning');
+            if (currentUser.balance < fee) return Swal.fire('Insufficient Funds', 'ยอดเครดิตไม่เพียงพอ กรุณาเติมเงินก่อนครับ', 'error');
 
-            const confirm = await Swal.fire({
-                title: 'ยืนยันสั่งจ้าง?',
-                text: `ยอดรวม ${price} ฿ จะถูกหักจากกระเป๋าเงินทันที`,
+            const result = await Swal.fire({
+                title: 'ยืนยันการจ้างงาน?',
+                text: `ยอดรวม ${fee} ฿ จะถูกหักทันที`,
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'ยืนยัน',
-                cancelButtonText: 'ยกเลิก'
+                background: '#020617',
+                color: '#fff',
+                confirmButtonColor: '#6366f1'
             });
 
-            if (confirm.isConfirmed) {
-                const orderID = "RS-" + Date.now().toString().slice(-6);
-                const orderData = {
-                    id: orderID,
-                    uid: currentUser.uid,
-                    userName: currentUser.name,
-                    gameID: gameID,
-                    price: price,
-                    mode: currentOrderMode === 'cs' ? '4V4 (CS)' : 'แรงค์ใหญ่ (BR)',
-                    detail: `${document.getElementById('ord-rank').selectedOptions[0].text} (${document.getElementById('ord-start').value} ➔ ${document.getElementById('ord-target').value})`,
-                    statusIndex: 0,
-                    report: "กำลังรอแอดมินตรวจสอบ...",
-                    timestamp: Date.now()
+            if (result.isConfirmed) {
+                const oid = "ORD-" + Math.random().toString(36).substr(2, 6).toUpperCase();
+                const payload = {
+                    id: oid, uid: currentUser.uid, userName: currentUser.name, gameID: gID,
+                    price: fee, mode: currentMode.toUpperCase(),
+                    detail: `${document.getElementById('input-rank').selectedOptions[0].text} (${cur}➔${tar})`,
+                    statusIndex: 0, report: "Deploying agent...", timestamp: Date.now()
                 };
 
-                // Transaction: Deduct Money & Save Order
-                db.ref('orders/' + orderID).set(orderData).then(() => {
-                    db.ref('users/' + currentUser.uid).update({ balance: currentUser.balance - price });
-                    Swal.fire('สำเร็จ!', 'บันทึกออเดอร์เรียบร้อย คุณสามารถติดตามความคืบหน้าได้ในหน้าสถานะ', 'success');
-                    switchPage('tracking');
-                    syncData();
+                // Exec Transaction
+                db.ref('orders/' + oid).set(payload).then(() => {
+                    db.ref('users/' + currentUser.uid).update({ balance: currentUser.balance - fee });
+                    Swal.fire({ title: 'Success', text: 'Deployment initialized!', icon: 'success', background: '#020617', color: '#fff' });
+                    goPage('tracking');
+                    manualSync();
                 });
             }
         }
 
-        async function submitTopup() {
-            const amount = parseFloat(document.getElementById('topup-amount').value);
-            const ref = document.getElementById('topup-ref').value;
-
-            if (isNaN(amount) || amount <= 0) return Swal.fire('ระบุยอดเงิน', 'กรุณากรอกยอดเงินที่คุณโอนมาจริง', 'warning');
-            if (!ref) return Swal.fire('ระบุหลักฐาน', 'กรุณากรอกเลขอ้างอิง หรือ ลิงก์ซองของขวัญ', 'warning');
-
-            const topupID = "TP-" + Date.now().toString().slice(-6);
-            const topupData = {
-                id: topupID,
-                uid: currentUser.uid,
-                userName: currentUser.name,
-                email: currentUser.email,
-                amount: amount,
-                ref: ref,
-                status: 'pending',
-                timestamp: Date.now()
-            };
-
-            db.ref('topups/' + topupID).set(topupData).then(() => {
-                Swal.fire('ส่งเรื่องแล้ว', 'แจ้งเติมเงินเรียบร้อย โปรดรอแอดมินตรวจสอบยอดเงิน', 'success');
-                document.getElementById('topup-amount').value = '';
-                document.getElementById('topup-ref').value = '';
+        async function submitGiftTopup() {
+            const url = document.getElementById('topup-url').value;
+            if (!url.includes('truemoney.com')) return Swal.fire('Invalid Link', 'กรุณาวางลิงก์ซองของขวัญที่ถูกต้องเท่านั้น', 'error');
+            
+            const tid = "TP-" + Date.now().toString().slice(-6);
+            db.ref('topups/' + tid).set({
+                id: tid, uid: currentUser.uid, userName: currentUser.name,
+                url: url, status: 'pending', timestamp: Date.now()
+            }).then(() => {
+                Swal.fire('Request Sent', 'กำลังรอการอนุมัติจากแอดมิน...', 'success');
+                document.getElementById('topup-url').value = '';
             });
         }
 
-        function renderMyOrders(orders) {
-            const container = document.getElementById('tracking-list');
-            container.innerHTML = "";
-            
-            if (orders.length === 0) {
-                container.innerHTML = `<div class="text-center py-20 text-slate-300"><i class="fas fa-box-open text-5xl mb-4"></i><p>ยังไม่มีประวัติการสั่งจ้าง</p></div>`;
+        function renderMyRadarUI(items) {
+            const root = document.getElementById('tracking-list-ui');
+            root.innerHTML = "";
+            if(items.length === 0) {
+                root.innerHTML = `<div class="text-center py-20 text-slate-700 font-black italic tracking-widest uppercase">No Active Radar Data</div>`;
                 return;
             }
 
-            orders.forEach(o => {
-                const totalSteps = systemSettings.workflows.length;
-                const progress = ((o.statusIndex + 1) / totalSteps) * 100;
+            items.forEach(o => {
+                const totalSteps = sysConfig.workflows.length;
+                const progWidth = ((o.statusIndex + 1) / totalSteps) * 100;
                 
                 let stepsHtml = '';
-                systemSettings.workflows.forEach((w, i) => {
-                    const isActive = i <= o.statusIndex;
+                sysConfig.workflows.forEach((w, i) => {
+                    const active = i <= o.statusIndex;
                     stepsHtml += `
-                        <div class="flex flex-col items-center gap-1">
-                            <div class="step-node ${isActive ? 'active' : ''}">${i+1}</div>
-                            <span class="text-[8px] font-bold ${isActive ? 'text-blue-600' : 'text-slate-300'} uppercase">${w}</span>
+                        <div class="flex flex-col items-center">
+                            <div class="step-dot ${active ? 'active' : ''}">${i+1}</div>
+                            <span class="text-[8px] font-black uppercase mt-2 ${active ? 'text-indigo-400' : 'text-slate-700'}">${w}</span>
                         </div>
                     `;
                 });
 
-                container.innerHTML += `
-                    <div class="glass-card p-6 animate__animated animate__fadeInUp">
-                        <div class="flex justify-between items-start mb-4">
+                root.innerHTML += `
+                    <div class="glass-panel p-8 animate__animated animate__fadeInUp">
+                        <div class="flex justify-between items-start mb-6">
                             <div>
-                                <h4 class="font-bold text-lg">${o.mode} <span class="text-xs text-blue-600">#${o.id}</span></h4>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase">${o.detail}</p>
+                                <h4 class="text-lg font-black italic tracking-tighter text-indigo-400">${o.mode} <span class="text-slate-600 font-bold ml-2">#${o.id}</span></h4>
+                                <p class="text-[9px] text-slate-500 font-black uppercase mt-1">Game UID: ${o.gameID}</p>
                             </div>
                             <div class="text-right">
-                                <p class="text-lg font-black text-slate-700">${o.price} ฿</p>
-                                <p class="text-[9px] text-slate-400">${new Date(o.timestamp).toLocaleString('th-TH')}</p>
+                                <p class="text-lg font-black">${o.price} ฿</p>
+                                <p class="text-[8px] text-slate-600 uppercase font-bold">${new Date(o.timestamp).toLocaleTimeString()}</p>
                             </div>
                         </div>
                         
-                        <div class="stepper-container">
-                            <div class="stepper-line"></div>
-                            <div class="stepper-progress" style="width: ${progress}%"></div>
+                        <div class="order-progress">
+                            <div class="progress-track"></div>
+                            <div class="progress-fill" style="width: ${progWidth}%"></div>
                             ${stepsHtml}
                         </div>
 
-                        <div class="mt-8 bg-blue-50/50 p-4 rounded-2xl flex gap-3 items-center border border-blue-100">
-                            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center animate-pulse"><i class="fas fa-info-circle"></i></div>
-                            <div class="flex-1">
-                                <p class="text-[9px] font-bold text-blue-400 uppercase tracking-widest leading-none">Status Report</p>
-                                <p class="text-xs font-bold text-slate-700 mt-1">${o.report || 'กำลังรออัปเดตจากแอดมิน...'}</p>
+                        <div class="mt-10 p-5 bg-white/5 rounded-3xl flex items-center gap-4 border border-white/5">
+                            <div class="w-10 h-10 bg-indigo-500/10 text-indigo-400 rounded-2xl flex items-center justify-center animate-pulse"><i class="fas fa-radar"></i></div>
+                            <div>
+                                <p class="text-[8px] font-black text-indigo-500 uppercase tracking-widest">Master Report</p>
+                                <p class="text-xs font-bold text-slate-300 mt-1">${o.report || 'Initializing status...'}</p>
                             </div>
                         </div>
                     </div>
@@ -1102,345 +991,325 @@
             });
         }
 
-        // Profile Editing
-        function toggleEditProfile() {
-            document.getElementById('edit-profile-box').classList.toggle('hidden');
-        }
+        // ============================================================
+        // 6. MASTER ADMIN ENGINE (V9 KERNEL)
+        // ============================================================
 
-        async function saveProfile() {
-            const newName = document.getElementById('edit-name').value;
-            const newFb = document.getElementById('edit-fb').value;
+        function updateAdminDashStats() {
+            document.getElementById('adm-stat-pending').innerText = storeOrders.filter(o => o.statusIndex < sysConfig.workflows.length - 1).length;
+            document.getElementById('adm-stat-done').innerText = storeOrders.filter(o => o.statusIndex === sysConfig.workflows.length - 1).length;
+            document.getElementById('adm-stat-money').innerText = storeTopups.filter(t => t.status === 'pending').length;
+            document.getElementById('adm-stat-users').innerText = storeUsers.length;
             
-            if(!newName) return Swal.fire('เตือน', 'กรุณาระบุชื่อของคุณ', 'warning');
-            
-            db.ref('users/' + currentUser.uid).update({
-                name: newName,
-                fb: newFb
-            }).then(() => {
-                Swal.fire('สำเร็จ', 'อัปเดตโปรไฟล์เรียบร้อย', 'success');
-                toggleEditProfile();
-            });
-        }
-
-        // =============================================
-        // 5. ADMIN ENGINE (LOGIC & RENDERING)
-        // =============================================
-
-        function updateAdminStats() {
-            document.getElementById('stat-pending-orders').innerText = allOrders.filter(o => o.statusIndex < systemSettings.workflows.length - 1).length;
-            document.getElementById('stat-completed-orders').innerText = allOrders.filter(o => o.statusIndex === systemSettings.workflows.length - 1).length;
-            document.getElementById('stat-pending-topups').innerText = allTopups.filter(t => t.status === 'pending').length;
-            document.getElementById('stat-total-users').innerText = allUsers.length;
-            
-            // Render Dash Recent
-            const recentOrders = allOrders.slice(0, 5);
-            const oList = document.getElementById('adm-recent-orders');
-            oList.innerHTML = recentOrders.map(o => `
-                <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                    <span class="text-xs font-bold">${o.userName} (${o.mode})</span>
-                    <span class="text-xs text-blue-600">${o.price} ฿</span>
+            // Latest Lists
+            const recentContainer = document.getElementById('adm-recent-list');
+            recentContainer.innerHTML = storeOrders.slice(0, 5).map(o => `
+                <div class="flex justify-between items-center p-3 hover:bg-white/5 rounded-2xl transition">
+                    <span class="text-xs font-bold text-slate-300">${o.userName} (${o.mode})</span>
+                    <span class="text-xs font-black text-indigo-400">${o.price} ฿</span>
                 </div>
-            `).join('') || '<p class="text-xs text-slate-300">ไม่มีข้อมูล</p>';
-            
-            const recentTopups = allTopups.filter(t => t.status === 'pending').slice(0, 5);
-            const tList = document.getElementById('adm-recent-topups');
-            tList.innerHTML = recentTopups.map(t => `
-                <div class="flex justify-between items-center p-3 bg-orange-50 rounded-xl">
-                    <span class="text-xs font-bold">${t.userName}</span>
-                    <span class="text-xs text-orange-600">+${t.amount} ฿</span>
-                </div>
-            `).join('') || '<p class="text-xs text-slate-300">ไม่มีข้อมูล</p>';
+            `).join('') || '<p class="text-xs text-slate-600">No recent activity</p>';
         }
 
-        function renderAdminOrders(filtered = null) {
-            const orders = filtered || allOrders;
-            const container = document.getElementById('adm-orders-list');
-            if(!container) return;
-            container.innerHTML = "";
+        function renderAdminOrders() {
+            const root = document.getElementById('adm-orders-ui');
+            if(!root) return;
+            root.innerHTML = "";
 
-            orders.forEach(o => {
-                let btnHtml = '';
-                systemSettings.workflows.forEach((w, i) => {
-                    const active = o.statusIndex === i;
-                    btnHtml += `<button onclick="updateOrderStatus('${o.id}', ${i})" class="px-3 py-1.5 rounded-lg text-[10px] font-bold transition ${active ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400'}">${w}</button>`;
+            storeOrders.forEach(o => {
+                let nodeBtns = '';
+                sysConfig.workflows.forEach((w, i) => {
+                    const current = o.statusIndex === i;
+                    nodeBtns += `<button onclick="admUpdateStatus('${o.id}', ${i})" class="px-3 py-1.5 rounded-xl text-[9px] font-black uppercase transition ${current ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-500'}">${w}</button>`;
                 });
 
-                container.innerHTML += `
-                    <div class="glass-card p-8 border-l-8 border-blue-500 animate__animated animate__fadeInUp">
-                        <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
+                root.innerHTML += `
+                    <div class="glass-panel p-10 border-l-[12px] border-indigo-600 animate__animated animate__fadeIn">
+                        <div class="flex flex-col lg:flex-row justify-between gap-6 mb-8">
                             <div>
-                                <h3 class="text-lg font-bold">${o.userName} <span class="text-xs font-normal text-slate-400">#${o.id}</span></h3>
-                                <p class="text-xs text-blue-600 font-bold uppercase tracking-widest">${o.mode}: ${o.detail}</p>
-                                <p class="text-xs text-slate-400 mt-1">UID: <span class="text-slate-700 font-mono">${o.gameID}</span></p>
+                                <h3 class="text-xl font-black italic text-white">${o.userName} <span class="text-slate-600 font-bold text-xs ml-2">#${o.id}</span></h3>
+                                <p class="text-xs text-indigo-400 font-black uppercase mt-1">${o.mode} Deployment / ${o.detail}</p>
+                                <div class="flex items-center gap-3 mt-4">
+                                    <span class="text-[10px] bg-slate-900 px-3 py-1 rounded-full font-bold">UID: ${o.gameID}</span>
+                                    <span class="text-[10px] bg-white/5 px-3 py-1 rounded-full font-bold">${new Date(o.timestamp).toLocaleString()}</span>
+                                </div>
                             </div>
                             <div class="text-right">
-                                <p class="text-2xl font-black text-slate-900">${o.price} ฿</p>
-                                <p class="text-[10px] text-slate-400">${new Date(o.timestamp).toLocaleString()}</p>
+                                <p class="text-3xl font-black text-white italic">${o.price} ฿</p>
+                                <div class="flex gap-2 justify-end mt-4">
+                                    <button onclick="admFinalizeJob('${o.id}')" class="action-chip bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white">Success ✅</button>
+                                    <button onclick="admCancelJob('${o.id}', '${o.uid}', ${o.price})" class="action-chip bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white">Revoke ❌</button>
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="flex flex-wrap gap-2 mb-6 p-4 bg-slate-50 rounded-2xl">
-                            ${btnHtml}
+                        <div class="p-6 bg-slate-950/50 rounded-3xl border border-white/5 mb-6">
+                            <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3">Kernel Stages Control</p>
+                            <div class="flex flex-wrap gap-2">${nodeBtns}</div>
                         </div>
 
-                        <div class="flex gap-4 items-center">
-                            <div class="input-group !mb-0 flex-1">
-                                <input type="text" id="rep-input-${o.id}" class="modern-input !py-3 !px-4 !text-xs" placeholder=" " value="${o.report || ''}">
-                                <label class="floating-label">พิมพ์ข้อความรายงานถึงลูกค้า...</label>
+                        <div class="flex gap-4">
+                            <div class="relative flex-1">
+                                <input type="text" id="adm-report-${o.id}" value="${o.report || ''}" class="glass-input !py-3 !text-xs w-full" placeholder=" ">
+                                <label class="floating-label">Live Agent Report</label>
                             </div>
-                            <button onclick="saveAdminReport('${o.id}')" class="bg-slate-900 text-white px-6 py-3 rounded-2xl text-xs font-bold">อัปเดต</button>
+                            <button onclick="admUpdateReport('${o.id}')" class="px-8 bg-slate-900 rounded-2xl text-[10px] font-black uppercase hover:bg-indigo-600 transition">Update</button>
                         </div>
                     </div>
                 `;
             });
         }
 
-        function updateOrderStatus(id, idx) {
-            db.ref('orders/' + id).update({ statusIndex: idx }).then(() => {
-                allOrders = allOrders.map(o => o.id === id ? {...o, statusIndex: idx} : o);
-                renderAdminOrders();
-            });
-        }
-
-        function saveAdminReport(id) {
-            const val = document.getElementById('rep-input-' + id).value;
-            db.ref('orders/' + id).update({ report: val }).then(() => {
-                Swal.fire({ title: 'ส่งแล้ว', text: 'รายงานสถานะไปที่ลูกค้าเรียบร้อย', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
-                allOrders = allOrders.map(o => o.id === id ? {...o, report: val} : o);
-            });
-        }
-
-        function filterAdminOrders() {
-            const query = document.getElementById('adm-order-search').value.toLowerCase();
-            const filtered = allOrders.filter(o => 
-                o.userName.toLowerCase().includes(query) || 
-                o.id.toLowerCase().includes(query) || 
-                o.gameID.toLowerCase().includes(query)
-            );
-            renderAdminOrders(filtered);
-        }
-
-        function renderAdminTopups() {
-            const container = document.getElementById('adm-topups-list');
-            if(!container) return;
-            const pending = allTopups.filter(t => t.status === 'pending');
-            container.innerHTML = "";
-
-            if(pending.length === 0) {
-                container.innerHTML = `<div class="col-span-2 text-center py-20 text-slate-300">ไม่มีรายการเติมเงินใหม่</div>`;
-                return;
-            }
-
-            pending.forEach(t => {
-                container.innerHTML += `
-                    <div class="glass-card p-6 border-l-8 border-orange-500 animate__animated animate__zoomIn">
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="text-xs font-bold text-slate-400">ID: ${t.id}</span>
-                            <span class="text-xs text-slate-400">${new Date(t.timestamp).toLocaleString()}</span>
-                        </div>
-                        <h4 class="text-xl font-bold">${t.userName}</h4>
-                        <p class="text-xs text-slate-500 mb-4">${t.email}</p>
-                        
-                        <div class="bg-orange-50 p-4 rounded-xl mb-4 border border-orange-100">
-                            <p class="text-xs font-bold text-orange-400 uppercase">ยอดโอน</p>
-                            <h2 class="text-2xl font-black text-orange-600">${t.amount} ฿</h2>
-                            <p class="text-[10px] text-slate-500 mt-2 font-mono break-all">REF: ${t.ref}</p>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <button onclick="approveTopup('${t.id}', '${t.uid}', ${t.amount})" class="bg-green-500 text-white py-3 rounded-xl font-bold text-xs">อนุมัติ ✅</button>
-                            <button onclick="rejectTopup('${t.id}')" class="bg-red-100 text-red-500 py-3 rounded-xl font-bold text-xs">ปฏิเสธ ❌</button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        async function approveTopup(tid, uid, amount) {
-            const confirm = await Swal.fire({ title: 'ยืนยันอนุมัติ?', text: `เงินจำนวน ${amount} ฿ จะเข้ากระเป๋าของลูกค้าทันที`, icon: 'warning', showCancelButton: true });
-            if(confirm.isConfirmed) {
-                // 1. Get Current User Balance
-                db.ref('users/' + uid + '/balance').once('value', snap => {
-                    const currentBal = snap.val() || 0;
-                    const newBal = currentBal + amount;
-                    
-                    // 2. Update Balance & Mark Topup as Success
-                    db.ref('users/' + uid).update({ balance: newBal });
-                    db.ref('topups/' + tid).update({ status: 'success' }).then(() => {
-                        Swal.fire('สำเร็จ', 'เติมเงินเข้ากระเป๋าเรียบร้อย', 'success');
-                        syncData();
+        async function admCancelJob(id, uid, fee) {
+            const confirm = await Swal.fire({ title: 'ยกเลิกงานและคืนเครดิต?', text: 'เครดิตจะคืนเข้าบัญชีลูกค้าทันที', icon: 'warning', background: '#020617', color: '#fff', showCancelButton: true });
+            if (confirm.isConfirmed) {
+                db.ref('users/' + uid).once('value', s => {
+                    const currentBal = s.val().balance || 0;
+                    db.ref('users/' + uid).update({ balance: currentBal + fee });
+                    db.ref('orders/' + id).remove().then(() => {
+                        Swal.fire('Terminated', 'Order revoked and agent refunded.', 'info');
+                        manualSync();
                     });
                 });
             }
         }
 
-        function rejectTopup(id) {
-            db.ref('topups/' + id).update({ status: 'rejected' }).then(() => {
-                Swal.fire('ปฏิเสธแล้ว', 'รายการนี้จะถูกลบออกจากรายการตรวจสอบ', 'info');
-                syncData();
+        function admFinalizeJob(id) {
+            db.ref('orders/' + id).update({ statusIndex: sysConfig.workflows.length - 1, report: "Deployment Complete. Access Granted. ✅" }).then(() => {
+                Swal.fire('Mission Success', 'Order completed.', 'success');
+                manualSync();
             });
         }
 
-        function renderAdminUsers(filtered = null) {
-            const users = filtered || allUsers;
-            const table = document.getElementById('adm-users-table');
-            if(!table) return;
-            table.innerHTML = "";
+        function admUpdateStatus(id, idx) {
+            db.ref('orders/' + id).update({ statusIndex: idx, report: "Status updated to: " + sysConfig.workflows[idx] }).then(() => manualSync());
+        }
 
-            users.forEach(u => {
-                table.innerHTML += `
-                    <tr class="border-b hover:bg-slate-50 transition">
-                        <td class="p-4">
-                            <div class="font-bold">${u.name}</div>
-                            <div class="text-[10px] text-slate-400">${u.email}</div>
+        function admUpdateReport(id) {
+            const msg = document.getElementById('adm-report-' + id).value;
+            db.ref('orders/' + id).update({ report: msg }).then(() => {
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Radar Updated', showConfirmButton: false, timer: 1500 });
+                manualSync();
+            });
+        }
+
+        function renderAdminTopups() {
+            const root = document.getElementById('adm-topups-ui');
+            if(!root) return;
+            const pendings = storeTopups.filter(t => t.status === 'pending');
+            root.innerHTML = "";
+
+            if(pendings.length === 0) {
+                root.innerHTML = `<div class="col-span-2 text-center py-20 text-slate-700 italic font-black uppercase tracking-[0.5em]">Clear of requests</div>`;
+                return;
+            }
+
+            pendings.forEach(t => {
+                root.innerHTML += `
+                    <div class="glass-panel p-8 animate__animated animate__zoomIn">
+                        <div class="flex justify-between items-center mb-6">
+                            <span class="text-[9px] font-black text-slate-500">ID: ${t.id}</span>
+                            <span class="text-[9px] font-black text-slate-500 uppercase">${new Date(t.timestamp).toLocaleTimeString()}</span>
+                        </div>
+                        <h4 class="text-xl font-black italic">${t.userName}</h4>
+                        <p class="text-xs text-indigo-400 font-bold mb-6">${t.url}</p>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <a href="${t.url}" target="_blank" class="py-3 bg-amber-500 text-slate-950 text-center font-black rounded-xl text-xs">OPEN LINK</a>
+                            <div class="flex gap-2">
+                                <input type="number" id="adm-top-amt-${t.id}" placeholder="Amt ฿" class="glass-input !py-1 !px-3 !rounded-xl !text-xs w-24">
+                                <button onclick="admApproveTopup('${t.id}', '${t.uid}')" class="flex-1 bg-indigo-600 rounded-xl font-black text-[10px] uppercase">Verify</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function admApproveTopup(id, uid) {
+            const amt = parseFloat(document.getElementById('adm-top-amt-' + id).value);
+            if (!amt || amt <= 0) return Swal.fire('Invalid Amount', 'กรุณากรอกยอดเงินจริง', 'error');
+
+            const confirm = await Swal.fire({ title: 'Verify Deposit?', text: `Deposit ${amt} ฿ to Agent?`, icon: 'warning', background: '#020617', color: '#fff', showCancelButton: true });
+            if (confirm.isConfirmed) {
+                db.ref('users/' + uid + '/balance').once('value', s => {
+                    const current = s.val() || 0;
+                    db.ref('users/' + uid).update({ balance: current + amt });
+                    db.ref('topups/' + id).update({ status: 'success', approvedAmount: amt }).then(() => {
+                        Swal.fire('Verified', 'Credit injection successful.', 'success');
+                        manualSync();
+                    });
+                });
+            }
+        }
+
+        function renderAdminUsers() {
+            const root = document.getElementById('adm-users-table-ui');
+            if(!root) return;
+            root.innerHTML = "";
+
+            storeUsers.forEach(u => {
+                root.innerHTML += `
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition">
+                        <td class="p-6">
+                            <div class="font-black italic text-white">${u.name}</div>
+                            <div class="text-[10px] text-slate-500 font-bold uppercase">${u.email}</div>
                         </td>
-                        <td class="p-4 font-black text-blue-600">${u.balance.toLocaleString()} ฿</td>
-                        <td class="p-4">
-                            <button onclick="editUserBalance('${u.uid}', ${u.balance})" class="bg-slate-900 text-white px-3 py-1.5 rounded-lg text-[10px]"><i class="fas fa-coins"></i> ปรับเงิน</button>
+                        <td class="p-6 font-black text-indigo-400 italic text-xl">${u.balance.toLocaleString()} ฿</td>
+                        <td class="p-6">
+                            <div class="flex gap-2">
+                                <button onclick="admEditAgentBal('${u.uid}', ${u.balance})" class="px-4 py-2 bg-slate-900 rounded-xl text-[9px] font-black uppercase hover:bg-indigo-600 transition">Force Balance</button>
+                                <a href="${u.fb || '#'}" target="_blank" class="px-4 py-2 bg-blue-600/10 text-blue-500 rounded-xl text-[9px] font-black uppercase">FB Profile</a>
+                            </div>
                         </td>
                     </tr>
                 `;
             });
         }
 
-        function filterAdminUsers() {
-            const query = document.getElementById('adm-user-search').value.toLowerCase();
-            const filtered = allUsers.filter(u => u.name.toLowerCase().includes(query) || u.email.toLowerCase().includes(query));
-            renderAdminUsers(filtered);
-        }
-
-        async function editUserBalance(uid, old) {
-            const { value: amount } = await Swal.fire({
-                title: 'ปรับยอดเงินคงเหลือ',
+        async function admEditAgentBal(uid, old) {
+            const { value: fresh } = await Swal.fire({
+                title: 'FORCE BALANCE INJECTION',
                 input: 'number',
-                inputLabel: 'กรอกยอดเงินที่ต้องการตั้งค่า (จะแทนที่ของเดิม)',
+                inputLabel: 'Target Balance Amount',
                 inputValue: old,
+                background: '#020617',
+                color: '#fff',
                 showCancelButton: true
             });
 
-            if (amount !== undefined) {
-                db.ref('users/' + uid).update({ balance: parseFloat(amount) }).then(() => {
-                    Swal.fire('บันทึกแล้ว', 'ยอดเงินใหม่คือ ' + amount + ' ฿', 'success');
-                    syncData();
+            if (fresh !== undefined) {
+                db.ref('users/' + uid).update({ balance: parseFloat(fresh) }).then(() => {
+                    Swal.fire('Data Patched', 'Balance updated to ' + fresh + ' ฿', 'success');
+                    manualSync();
                 });
             }
         }
 
-        // =============================================
-        // 6. SYSTEM SETTINGS CONTROL
-        // =============================================
+        // ============================================================
+        // 7. SETTINGS & CONTACT NODE MANAGER
+        // ============================================================
 
-        function updateSettingsInputs() {
-            document.getElementById('set-wallet-num').value = systemSettings.walletNum;
-            document.getElementById('set-wallet-name').value = systemSettings.walletName;
-            document.getElementById('set-announce').value = systemSettings.announce;
+        function syncAdminSettingsInputs() {
+            document.getElementById('set-ann').value = sysConfig.announce;
+            document.getElementById('set-wf').value = (sysConfig.workflows || []).join(', ');
             
-            document.getElementById('rate-cs-low').value = systemSettings.rates.cs_low;
-            document.getElementById('rate-cs-red').value = systemSettings.rates.cs_red;
-            document.getElementById('rate-cs-master').value = systemSettings.rates.cs_master;
-            document.getElementById('rate-cs-grand').value = systemSettings.rates.cs_grand;
-            document.getElementById('rate-br-low').value = systemSettings.rates.br_low;
-            document.getElementById('rate-br-high').value = systemSettings.rates.br_high;
+            document.getElementById('s-cs-low').value = sysConfig.rates.cs_low;
+            document.getElementById('s-cs-red').value = sysConfig.rates.cs_red;
+            document.getElementById('s-cs-master').value = sysConfig.rates.cs_master;
+            document.getElementById('s-cs-grand').value = sysConfig.rates.cs_grand;
+            document.getElementById('s-br-low').value = sysConfig.rates.br_low;
+            document.getElementById('s-br-high').value = sysConfig.rates.br_high;
             
-            document.getElementById('set-workflows').value = systemSettings.workflows.join(', ');
-            
-            // Shop Status UI
-            const btn = document.getElementById('shop-toggle-btn');
-            const txt = document.getElementById('shop-status-text');
-            if (systemSettings.isClosed) {
-                btn.innerText = "เปิดรับงาน"; btn.className = "px-4 py-2 bg-green-500 text-white rounded-xl text-xs font-bold";
-                txt.innerText = "ปิดรับงานอยู่"; txt.className = "text-red-600";
+            const btn = document.getElementById('shop-toggle');
+            if (sysConfig.isClosed) {
+                btn.innerText = "OFFLINE"; btn.className = "px-6 py-2 bg-red-600 text-[10px] font-black italic rounded-full shadow-lg transition";
             } else {
-                btn.innerText = "สั่งปิดร้าน"; btn.className = "px-4 py-2 bg-red-500 text-white rounded-xl text-xs font-bold";
-                txt.innerText = "เปิดปกติ"; txt.className = "text-green-600";
+                btn.innerText = "ACTIVE"; btn.className = "px-6 py-2 bg-indigo-600 text-[10px] font-black italic rounded-full shadow-lg transition";
             }
+
+            renderContactNodesEditor();
         }
 
-        function toggleShopStatus() {
-            db.ref('settings/isClosed').set(!systemSettings.isClosed).then(() => syncData());
+        function addContactNode() {
+            if(!sysConfig.links) sysConfig.links = [];
+            sysConfig.links.push({ name: "New Node", url: "#", icon: "fab fa-facebook-messenger", active: true });
+            renderContactNodesEditor();
         }
 
-        function saveGeneralSettings() {
-            const data = {
-                walletNum: document.getElementById('set-wallet-num').value,
-                walletName: document.getElementById('set-wallet-name').value,
-                announce: document.getElementById('set-announce').value
-            };
-            db.ref('settings').update(data).then(() => {
-                Swal.fire('สำเร็จ', 'บันทึกข้อมูลทั่วไปเรียบร้อย', 'success');
-                syncData();
-            });
+        function renderContactNodesEditor() {
+            const root = document.getElementById('contact-nodes-list');
+            root.innerHTML = (sysConfig.links || []).map((l, i) => `
+                <div class="p-5 bg-white/5 rounded-3xl border border-white/5 space-y-3">
+                    <div class="flex gap-2">
+                        <input type="text" value="${l.name}" onchange="updateNode(${i}, 'name', this.value)" class="glass-input !py-2 !text-[10px] flex-1" placeholder="Label">
+                        <input type="text" value="${l.icon}" onchange="updateNode(${i}, 'icon', this.value)" class="glass-input !py-2 !text-[10px] w-32" placeholder="FontAwesome Icon">
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" value="${l.url}" onchange="updateNode(${i}, 'url', this.value)" class="glass-input !py-2 !text-[10px] flex-1" placeholder="URL">
+                        <button onclick="removeNode(${i})" class="text-red-500 p-2"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        function saveRates() {
+        function updateNode(idx, field, val) { sysConfig.links[idx][field] = val; }
+        function removeNode(idx) { sysConfig.links.splice(idx, 1); renderContactNodesEditor(); }
+
+        function toggleShopDeployment() {
+            db.ref('settings/isClosed').set(!sysConfig.isClosed).then(() => manualSync());
+        }
+
+        function saveMasterCore() {
+            const workflows = document.getElementById('set-wf').value.split(',').map(s => s.trim()).filter(s => s !== "");
+            db.ref('settings').update({
+                announce: document.getElementById('set-ann').value,
+                workflows: workflows
+            }).then(() => Swal.fire('Kernel Updated', 'Core settings committed.', 'success'));
+        }
+
+        function saveServiceAssets() {
             const rates = {
-                cs_low: parseInt(document.getElementById('rate-cs-low').value),
-                cs_red: parseInt(document.getElementById('rate-cs-red').value),
-                cs_master: parseInt(document.getElementById('rate-cs-master').value),
-                cs_grand: parseInt(document.getElementById('rate-cs-grand').value),
-                br_low: parseInt(document.getElementById('rate-br-low').value),
-                br_high: parseInt(document.getElementById('rate-br-high').value)
+                cs_low: parseInt(document.getElementById('s-cs-low').value),
+                cs_red: parseInt(document.getElementById('s-cs-red').value),
+                cs_master: parseInt(document.getElementById('s-cs-master').value),
+                cs_grand: parseInt(document.getElementById('s-cs-grand').value),
+                br_low: parseInt(document.getElementById('s-br-low').value),
+                br_high: parseInt(document.getElementById('s-br-high').value)
             };
-            const workflows = document.getElementById('set-workflows').value.split(',').map(s => s.trim()).filter(s => s !== "");
-            
-            db.ref('settings').update({ rates, workflows }).then(() => {
-                Swal.fire('สำเร็จ', 'บันทึกเรทราคาและขั้นตอนเรียบร้อย', 'success');
-                syncData();
-            });
+            db.ref('settings').update({ rates, links: sysConfig.links }).then(() => Swal.fire('Assets Saved', 'Rates and Links synchronized.', 'success'));
         }
 
-        // =============================================
-        // 7. AUTH HANDLERS
-        // =============================================
+        // ============================================================
+        // 8. AUTH & LOGOUT HANDLERS
+        // ============================================================
 
         async function handleLogin() {
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-password').value;
-
-            if (!email || !pass) return Swal.fire('เตือน', 'กรุณากรอกข้อมูลให้ครบทุกช่อง', 'warning');
-
+            const e = document.getElementById('log-email').value;
+            const p = document.getElementById('log-pass').value;
+            if (!e || !p) return Swal.fire('Error', 'กรุณากรอกข้อมูลให้ครบครับ', 'warning');
+            
             Swal.showLoading();
-            auth.signInWithEmailAndPassword(email, pass).catch(err => {
+            auth.signInWithEmailAndPassword(e, p).catch(err => {
                 Swal.close();
-                Swal.fire('เข้าสู่ระบบไม่สำเร็จ', 'อีเมลหรือรหัสผ่านไม่ถูกต้อง หรือโปรดตรวจสอบการเชื่อมต่อ', 'error');
+                Swal.fire('Auth Failed', 'ไอดีหรือรหัสผ่านไม่ถูกต้อง หรือเซิร์ฟเวอร์ขัดข้อง', 'error');
             });
         }
 
         async function handleRegister() {
-            const name = document.getElementById('reg-name').value;
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-password').value;
-            const fb = document.getElementById('reg-fb').value;
+            const n = document.getElementById('reg-name').value;
+            const e = document.getElementById('reg-email').value;
+            const p = document.getElementById('reg-pass').value;
+            const f = document.getElementById('reg-fb').value;
 
-            if (!name || !email || !pass) return Swal.fire('เตือน', 'กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
+            if (!n || !e || p.length < 6) return Swal.fire('Error', 'กรุณากรอกข้อมูลให้ครบและรหัส 6 ตัวขึ้นไป', 'warning');
 
             Swal.showLoading();
-            auth.createUserWithEmailAndPassword(email, pass).then(res => {
+            auth.createUserWithEmailAndPassword(e, p).then(res => {
                 db.ref('users/' + res.user.uid).set({
-                    uid: res.user.uid,
-                    name: name,
-                    email: email,
-                    fb: fb,
-                    balance: 0,
-                    registeredAt: Date.now()
+                    uid: res.user.uid, name: n, email: e, fb: f, balance: 0, registered: Date.now()
                 }).then(() => {
                     Swal.close();
-                    Swal.fire('สำเร็จ', 'สมัครสมาชิกเรียบร้อย ยินดีต้อนรับครับ', 'success');
+                    Swal.fire('Agent Registered', 'ยินดีต้อนรับสู่โปรแกรมครับ', 'success');
                 });
-            }).catch(err => {
-                Swal.close();
-                Swal.fire('ผิดพลาด', 'ไม่สามารถสมัครได้: ' + err.message, 'error');
-            });
+            }).catch(err => { Swal.close(); Swal.fire('Failed', err.message, 'error'); });
         }
 
         function handleLogout() {
-            auth.signOut().then(() => {
-                location.reload();
-            });
+            auth.signOut().then(() => location.reload());
         }
 
-        // INIT LOAD
-        syncData();
+        function openContactModal() {
+            if(sysConfig.links && sysConfig.links.length > 0) {
+                const linksHtml = sysConfig.links.map(l => `<a href="${l.url}" target="_blank" style="display:block; padding:15px; background:rgba(255,255,255,0.05); margin-bottom:10px; border-radius:15px; color:#fff; font-weight:bold;"><i class="${l.icon} mr-2"></i> ${l.name}</a>`).join('');
+                Swal.fire({ title: 'Contact Master Agent', html: linksHtml, background: '#020617', showConfirmButton: false });
+            } else {
+                Swal.fire('No Data', 'ขณะนี้ยังไม่ได้ตั้งค่าช่องทางติดต่อครับ', 'info');
+            }
+        }
+
+        // Initial Load
+        manualSync();
 
     </script>
 </body>
